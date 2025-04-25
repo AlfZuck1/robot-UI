@@ -106,8 +106,8 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     
     // Joint 2
     this.joint2 = new THREE.Object3D();
-    const heightArm2 = 1.6;
-    const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, heightArm2, 14), new THREE.MeshStandardMaterial({ color: "gray" }));
+    const heightArm2 = 1.1;
+    const arm2 = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, heightArm2, 20), new THREE.MeshStandardMaterial({ color: "gray" }));
     arm2.rotation.z = Math.PI / 2; // Rotación inicial para el segundo brazo
     this.joint2.add(arm2);
     this.joint2.position.y = heightArm1;
@@ -117,7 +117,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     const joint1extra = new THREE.Object3D();
     const heightArm1extra = 1.3;
-    const arm1extra = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, heightArm1extra, 14), new THREE.MeshStandardMaterial({ color: "white" }));
+    const arm1extra = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, heightArm1extra, 14), new THREE.MeshStandardMaterial({ color: "white" }));
     arm1extra.position.y = heightArm1extra / 2;
     joint1extra.add(arm1extra);
     this.joint2.add(joint1extra);
@@ -126,8 +126,8 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     // Joint 3
     this.joint3 = new THREE.Object3D();
-    const heightArm3 = 0.9;
-    const arm3 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, heightArm3, 14), new THREE.MeshStandardMaterial({ color: "white" }));
+    const heightArm3 = 0.4;
+    const arm3 = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, heightArm3, 14), new THREE.MeshStandardMaterial({ color: "white" }));
     arm3.rotation.z = Math.PI / 2; // Rotación inicial para el tercer brazo
     this.joint3.add(arm3);
     this.joint3.position.y = heightArm1extra;
@@ -138,7 +138,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     // Joint 4
     this.joint4 = new THREE.Object3D();
     const heightArm4 = 1.3;
-    const arm4 = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, heightArm4, 14), new THREE.MeshStandardMaterial({ color: "white" }));
+    const arm4 = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, heightArm4, 14), new THREE.MeshStandardMaterial({ color: "white" }));
     arm4.position.y = heightArm4 / 2;
     this.joint4.add(arm4);
     this.joint3.add(this.joint4);
@@ -147,11 +147,11 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     // Joint 5
     this.joint5 = new THREE.Object3D();
-    const heightArm5 = 0.5;
-    const arm5 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, heightArm5, 14), new THREE.MeshStandardMaterial({ color: "gray" }));
+    const heightArm5 = 0.4;
+    const arm5 = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, heightArm5, 14), new THREE.MeshStandardMaterial({ color: "gray" }));
     arm5.rotation.z = Math.PI / 2; // Rotación inicial para el cuarto brazo
     this.joint5.add(arm5);
-    this.joint5.position.y = heightArm4;
+    this.joint5.position.y = heightArm4 + 0.15;
     this.joint4.add(this.joint5);
     arm5.castShadow = true;
     arm5.receiveShadow = true;
