@@ -1,8 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as THREE from 'three';
-import { OrbitControls, ThreeMFLoader } from 'three/examples/jsm/Addons.js';
-import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import URDFLoader from 'urdf-loader';
 
 @Component({
   selector: 'app-robot-arm',
@@ -50,7 +50,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     this.renderer.setSize(width, height);
 
     this.camera = new THREE.PerspectiveCamera(75, width / height, 1, 100);
-    this.camera.position.set(5, 5, 0);
+    this.camera.position.set(0, 1.5, -1.2);
 
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
 
@@ -58,8 +58,8 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     controls.enableDamping = true;
 
     // Floor
-    const floorGeometry = new THREE.PlaneGeometry(10, 10);
-    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+    const floorGeometry = new THREE.PlaneGeometry(3, 3);
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, side: THREE.DoubleSide });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.receiveShadow = true;
     floor.rotation.x = -Math.PI / 2;
@@ -75,7 +75,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     // Light
     const light = new THREE.DirectionalLight(data.lightColor, 2);
-    light.position.set(5, 15, -5);
+    light.position.set(1, 2, -1);
     light.castShadow = true;
     light.shadow.camera.near = 0.1;
     light.shadow.camera.far = 50;
@@ -83,6 +83,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     light.shadow.mapSize.height = data.shadowMapSizeHeight; // default
     this.scene.add(light);
 
+    /*
     // Base
     this.base = new THREE.Object3D();
     const heightBase = 0.7;
@@ -180,20 +181,42 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     const arrowZ6 = new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 0, 0), 1, 0x0000ff, 0.3, 0.2); // Blue for Z
     this.joint6.add(arrowX6);
     this.joint6.add(arrowY6);
-    this.joint6.add(arrowZ6);
+    this.joint6.add(arrowZ6);*/
+
+    const manager = new THREE.LoadingManager();
+    const loader = new URDFLoader(manager); 
+
+    loader.load(
+      'urdf/CRSA465.urdf', // Adjust the path to the URDF file as needed
+      (urdf) => {
+        console.log('URDF loaded:', urdf);
+        urdf.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        this.scene.add(urdf);
+      },
+      undefined,
+      (error) => {
+        console.error('An error occurred while loading the URDF:', error);
+      }
+    );
   }
 
 
     animate() {
       requestAnimationFrame(() => this.animate());
 
-      // Animaciones (puedes luego conectar esto con controles)
+      /*
       this.joint1.rotation.y = THREE.MathUtils.degToRad(this.angle1);
       this.joint2.rotation.x = THREE.MathUtils.degToRad(this.angle2);
       this.joint3.rotation.x = THREE.MathUtils.degToRad(this.angle3);
       this.joint4.rotation.y = THREE.MathUtils.degToRad(this.angle4);
       this.joint5.rotation.x = THREE.MathUtils.degToRad(this.angle5);
       this.joint6.rotation.y = THREE.MathUtils.degToRad(this.angle6);
+      */
 
       this.renderer.render(this.scene, this.camera);
     }
