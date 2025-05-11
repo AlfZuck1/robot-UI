@@ -149,7 +149,7 @@
       xyz="8.8553E-05 0.3119 0"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="joint1" />
     <child
       link="joint2" />
     <axis
@@ -207,7 +207,7 @@
       xyz="0.19207 0.54864 -0.00054446"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="joint2" />
     <child
       link="joint3" />
     <axis
@@ -265,7 +265,7 @@
       xyz="0.2705 0.48405 -0.00076675"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="joint3" />
     <child
       link="joint4" />
     <axis
@@ -323,7 +323,7 @@
       xyz="0.45185 0.33471 -0.0012794"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="joint4" />
     <child
       link="Joint5" />
     <axis
@@ -381,7 +381,7 @@
       xyz="0.50446 0.30484 -0.0018679"
       rpy="0 0 0" />
     <parent
-      link="base_link" />
+      link="Joint5" />
     <child
       link="Joint6" />
     <axis

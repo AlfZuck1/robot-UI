@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { RosService } from '../services/ros.service';
+import ROSLIB from 'roslib';
 
 @Component({
   selector: 'app-robot-arm',
@@ -32,6 +33,8 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
   angle5: number = 0;
   angle6: number = 0;
 
+  robotModel: any;
+
   constructor(private rosService: RosService) { }
 
   sendMessage() {
@@ -43,6 +46,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.initScene();
     this.animate();
+    this.rosService.subscribeToJointStates((message) => this.updateRobotMovement(message));
   }
 
   initScene() {
@@ -191,9 +195,9 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     this.joint6.add(arrowZ6);*/
 
     const manager = new THREE.LoadingManager();
-    const loader = new URDFLoader(manager); 
+    const loader = new URDFLoader(manager);
 
-    loader.load(
+    /*loader.load(
       'urdf/CRSA465.urdf', // Adjust the path to the URDF file as needed
       (urdf) => {
         console.log('URDF loaded:', urdf);
@@ -209,22 +213,55 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
       (error) => {
         console.error('An error occurred while loading the URDF:', error);
       }
-    );
+    );*/
+
+    // Cargar URDF desde el parámetro de ROS
+    const param = this.rosService.getUrdf();
+
+    param.get((value) => {
+      if (!value) {
+        console.error('No se pudo obtener el URDF desde el parámetro de ROS.');
+        return;
+      }
+
+      console.log('URDF recibido:', value);
+
+      const loader = new URDFLoader();
+      this.robotModel = loader.parse(value);
+
+      this.scene.add(this.robotModel);
+      // Luego agrega cámara, luz y renderer con Three.js
+    });
   }
 
+  updateRobotMovement(message: any) {
+    const jointNames = message.name;
+    const jointPositions = message.position;
 
-    animate() {
-      requestAnimationFrame(() => this.animate());
+    for (let i = 0; i < jointNames.length; i++) {
+      const jointName = jointNames[i];
+      const position = jointPositions[i];
 
-      /*
-      this.joint1.rotation.y = THREE.MathUtils.degToRad(this.angle1);
-      this.joint2.rotation.x = THREE.MathUtils.degToRad(this.angle2);
-      this.joint3.rotation.x = THREE.MathUtils.degToRad(this.angle3);
-      this.joint4.rotation.y = THREE.MathUtils.degToRad(this.angle4);
-      this.joint5.rotation.x = THREE.MathUtils.degToRad(this.angle5);
-      this.joint6.rotation.y = THREE.MathUtils.degToRad(this.angle6);
-      */
-
-      this.renderer.render(this.scene, this.camera);
+      const joint = this.robotModel.joints[jointName];
+      if (joint) {
+        joint.setJointValue(position);
+      }
     }
   }
+
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+
+    /*
+    this.joint1.rotation.y = THREE.MathUtils.degToRad(this.angle1);
+    this.joint2.rotation.x = THREE.MathUtils.degToRad(this.angle2);
+    this.joint3.rotation.x = THREE.MathUtils.degToRad(this.angle3);
+    this.joint4.rotation.y = THREE.MathUtils.degToRad(this.angle4);
+    this.joint5.rotation.x = THREE.MathUtils.degToRad(this.angle5);
+    this.joint6.rotation.y = THREE.MathUtils.degToRad(this.angle6);
+    */
+
+    this.renderer.render(this.scene, this.camera);
+  }
+}
