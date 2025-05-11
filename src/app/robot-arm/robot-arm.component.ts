@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
+import { RosService } from '../services/ros.service';
 
 @Component({
   selector: 'app-robot-arm',
@@ -30,6 +31,12 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
   angle4: number = 0;
   angle5: number = 0;
   angle6: number = 0;
+
+  constructor(private rosService: RosService) { }
+
+  sendMessage() {
+    this.rosService.publishExample();
+  }
 
   ngOnInit(): void { }
 
