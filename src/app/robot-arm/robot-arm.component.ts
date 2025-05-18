@@ -94,126 +94,8 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     light.shadow.mapSize.height = data.shadowMapSizeHeight; // default
     this.scene.add(light);
 
-    /*
-    // Base
-    this.base = new THREE.Object3D();
-    const heightBase = 0.7;
-    const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.7, heightBase), new THREE.MeshStandardMaterial({ color: "black" }));
-    this.base.add(baseMesh);
-    this.scene.add(this.base);
-    baseMesh.position.y = heightBase / 2;
-    baseMesh.castShadow = true;
-    baseMesh.receiveShadow = true;
-
-    // Joint 1
-    this.joint1 = new THREE.Object3D();
-    const heightArm1 = 0.6;
-    const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, heightArm1, 14), new THREE.MeshStandardMaterial({ color: "black" }));
-    arm1.position.y = heightArm1 / 2;
-    this.joint1.add(arm1);
-    this.joint1.position.y = heightBase / 2;
-    this.base.add(this.joint1);
-    arm1.castShadow = true;
-    arm1.receiveShadow = true;
-    
-    // Joint 2
-    this.joint2 = new THREE.Object3D();
-    const heightArm2 = 1.1;
-    const arm2 = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, heightArm2, 20), new THREE.MeshStandardMaterial({ color: "gray" }));
-    arm2.rotation.z = Math.PI / 2; // Rotación inicial para el segundo brazo
-    this.joint2.add(arm2);
-    this.joint2.position.y = heightArm1;
-    this.joint1.add(this.joint2);
-    arm2.castShadow = true;
-    arm2.receiveShadow = true;
-
-    const joint1extra = new THREE.Object3D();
-    const heightArm1extra = 1.3;
-    const arm1extra = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, heightArm1extra, 14), new THREE.MeshStandardMaterial({ color: "white" }));
-    arm1extra.position.y = heightArm1extra / 2;
-    joint1extra.add(arm1extra);
-    this.joint2.add(joint1extra);
-    arm1extra.castShadow = true;
-    arm1extra.receiveShadow = true;
-
-    // Joint 3
-    this.joint3 = new THREE.Object3D();
-    const heightArm3 = 0.4;
-    const arm3 = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, heightArm3, 14), new THREE.MeshStandardMaterial({ color: "white" }));
-    arm3.rotation.z = Math.PI / 2; // Rotación inicial para el tercer brazo
-    this.joint3.add(arm3);
-    this.joint3.position.y = heightArm1extra;
-    joint1extra.add(this.joint3);
-    arm3.castShadow = true;
-    arm3.receiveShadow = true;
-
-    // Joint 4
-    this.joint4 = new THREE.Object3D();
-    const heightArm4 = 1.3;
-    const arm4 = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, heightArm4, 14), new THREE.MeshStandardMaterial({ color: "white" }));
-    arm4.position.y = heightArm4 / 2;
-    this.joint4.add(arm4);
-    this.joint3.add(this.joint4);
-    arm4.castShadow = true;
-    arm4.receiveShadow = true;
-
-    // Joint 5
-    this.joint5 = new THREE.Object3D();
-    const heightArm5 = 0.4;
-    const arm5 = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, heightArm5, 14), new THREE.MeshStandardMaterial({ color: "gray" }));
-    arm5.rotation.z = Math.PI / 2; // Rotación inicial para el cuarto brazo
-    this.joint5.add(arm5);
-    this.joint5.position.y = heightArm4 + 0.15;
-    this.joint4.add(this.joint5);
-    arm5.castShadow = true;
-    arm5.receiveShadow = true;
-
-    // Joint 6
-    this.joint6 = new THREE.Object3D();
-    const heightArm6 = 0.3;
-    const arm6 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, heightArm6, 14), new THREE.MeshStandardMaterial({ color: "gray" }));
-    arm6.position.y = heightArm6 / 2;
-    this.joint6.add(arm6);
-    this.joint5.add(this.joint6);
-    arm6.castShadow = true;
-    arm6.receiveShadow = true;
-
-    // Arrows for Base
-    const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 1.5, 0x00ff00, 0.3, 0.3); // Green for X
-    const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1.5, 0x0000ff, 0.3, 0.3); // Blue for Y
-    const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1.5, 0xff0000, 0.3, 0.3); // Red for Z
-    this.base.add(arrowX);
-    this.base.add(arrowY);
-    this.base.add(arrowZ);
-
-    // Arrows for joint6
-    const arrowX6 = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 1, 0x00ff00, 0.3, 0.2); // Green for X
-    const arrowY6 = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 1, 0xff0000, 0.3, 0.2); // Red for Y
-    const arrowZ6 = new THREE.ArrowHelper(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 0, 0), 1, 0x0000ff, 0.3, 0.2); // Blue for Z
-    this.joint6.add(arrowX6);
-    this.joint6.add(arrowY6);
-    this.joint6.add(arrowZ6);*/
-
     const manager = new THREE.LoadingManager();
     const loader = new URDFLoader(manager);
-
-    /*loader.load(
-      'urdf/CRSA465.urdf', // Adjust the path to the URDF file as needed
-      (urdf) => {
-        console.log('URDF loaded:', urdf);
-        urdf.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        this.scene.add(urdf);
-      },
-      undefined,
-      (error) => {
-        console.error('An error occurred while loading the URDF:', error);
-      }
-    );*/
 
     // Cargar URDF desde el parámetro de ROS
     const param = this.rosService.getUrdf();
@@ -252,16 +134,35 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
   animate() {
     requestAnimationFrame(() => this.animate());
-
-    /*
-    this.joint1.rotation.y = THREE.MathUtils.degToRad(this.angle1);
-    this.joint2.rotation.x = THREE.MathUtils.degToRad(this.angle2);
-    this.joint3.rotation.x = THREE.MathUtils.degToRad(this.angle3);
-    this.joint4.rotation.y = THREE.MathUtils.degToRad(this.angle4);
-    this.joint5.rotation.x = THREE.MathUtils.degToRad(this.angle5);
-    this.joint6.rotation.y = THREE.MathUtils.degToRad(this.angle6);
-    */
-
     this.renderer.render(this.scene, this.camera);
+  }
+
+  moveJoint(joint: string, angle: number) {
+    switch (joint) {
+      case 'joint1':
+        this.angle1 = angle;
+        this.rosService.publishJointState(['joint1'], [angle/180 * Math.PI]); // Convertir a radianes
+        break;
+      case 'joint2':
+        this.angle2 = angle;
+        this.rosService.publishJointState(['joint2'], [angle/180 * Math.PI]);
+        break;
+      case 'joint3':
+        this.angle3 = angle;
+        this.rosService.publishJointState(['joint3'], [angle/180 * Math.PI]);
+        break;
+      case 'joint4':
+        this.angle4 = angle;
+        this.rosService.publishJointState(['joint4'], [angle/180 * Math.PI]);
+        break;
+      case 'joint5':
+        this.angle5 = angle;
+        this.rosService.publishJointState(['joint5'], [angle/180 * Math.PI]);
+        break;
+      case 'joint6':
+        this.angle6 = angle;
+        this.rosService.publishJointState(['joint6'], [angle/180 * Math.PI]);
+        break;
+    }
   }
 }

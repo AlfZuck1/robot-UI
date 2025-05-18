@@ -6,11 +6,13 @@ import ROSLIB from 'roslib';
 })
 export class RosService {
   private ros: ROSLIB.Ros;
-  private jointStateListener: ROSLIB.Topic;
+  private jointStateTopic: ROSLIB.Topic;
+  private readonly API_URL = 'http://localhost:8000/send_command';
+  private readonly PASSWORD = 'KL-jBjzte-dsr0HjGQnFMw';
 
   constructor() {
     this.ros = new ROSLIB.Ros({
-      url: 'ws://localhost:9090' 
+      url: 'ws://localhost:9090'
     });
 
     this.ros.on('connection', () => {
@@ -25,7 +27,7 @@ export class RosService {
       console.log('Conexión ROS cerrada.');
     });
 
-    this.jointStateListener = new ROSLIB.Topic({
+    this.jointStateTopic = new ROSLIB.Topic({
       ros: this.ros,
       name: '/joint_states',
       messageType: 'sensor_msgs/JointState'
@@ -40,7 +42,7 @@ export class RosService {
   }
 
   subscribeToJointStates(callback: (message: ROSLIB.Message) => void) {
-    this.jointStateListener.subscribe((message: ROSLIB.Message) => {
+    this.jointStateTopic.subscribe((message: ROSLIB.Message) => {
       console.log('Received joint states:', message);
       callback(message);
     });
@@ -58,5 +60,30 @@ export class RosService {
     });
 
     topic.publish(message);
+  }
+
+  publishJointState(names: string[], positions: number[]) {
+    const payload = {
+      password: this.PASSWORD,
+      name: names,
+      position: positions
+    };
+
+    fetch(this.API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const err = await response.json();
+          console.error('Error publicando estado:', err.detail || response.statusText);
+          return;
+        }
+        console.log('Estado publicado con éxito');
+      })
+      .catch(err => {
+        console.error('Error al conectar con API:', err);
+      });
   }
 }
