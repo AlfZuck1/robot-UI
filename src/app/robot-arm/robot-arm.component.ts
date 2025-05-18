@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { RosService } from '../services/ros.service';
-import ROSLIB from 'roslib';
 
 @Component({
   selector: 'app-robot-arm',
@@ -59,60 +58,61 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     const width = this.canvasContainer.nativeElement.clientWidth;
     const height = this.canvasContainer.nativeElement.clientHeight;
     this.renderer.setSize(width, height);
-
     this.camera = new THREE.PerspectiveCamera(75, width / height, 1, 100);
-    this.camera.position.set(0, 1.5, -1.2);
-
+    this.camera.position.set(0, 4, -4);
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
-
     const controls = new OrbitControls(this.camera, this.renderer.domElement)
-    controls.enableDamping = true;
 
     // Floor
-    const floorGeometry = new THREE.PlaneGeometry(3, 3);
+    const floorGeometry = new THREE.PlaneGeometry(10, 10);
     const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, side: THREE.DoubleSide });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.receiveShadow = true;
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.01;
+    floor.position.y = 0;
     this.scene.add(floor);
 
     const data = {
       color: 0x00ff00,
       lightColor: 0xffffff,
-      shadowMapSizeWidth: 1024,
-      shadowMapSizeHeight: 1024,
+      shadowMapSizeWidth: 2048,
+      shadowMapSizeHeight: 2048,
     }
 
     // Light
-    const light = new THREE.DirectionalLight(data.lightColor, 2);
-    light.position.set(1, 2, -1);
+    const light = new THREE.DirectionalLight(data.lightColor, 2.5);
+    light.position.set(2, 5, -5);
     light.castShadow = true;
     light.shadow.camera.near = 0.1;
-    light.shadow.camera.far = 50;
+    light.shadow.camera.far = 20;
     light.shadow.mapSize.width = data.shadowMapSizeWidth; // default
     light.shadow.mapSize.height = data.shadowMapSizeHeight; // default
     this.scene.add(light);
 
+    // Cargar URDF desde el parámetro de ROS
     const manager = new THREE.LoadingManager();
     const loader = new URDFLoader(manager);
-
-    // Cargar URDF desde el parámetro de ROS
     const param = this.rosService.getUrdf();
-
     param.get((value) => {
       if (!value) {
         console.error('No se pudo obtener el URDF desde el parámetro de ROS.');
         return;
       }
-
-      console.log('URDF recibido:', value);
-
-      const loader = new URDFLoader();
+      console.log('URDF recibido', value);
+      // Cargar el modelo URDF
       this.robotModel = loader.parse(value);
+      setTimeout(() => {
+        this.robotModel.traverse((child: THREE.Object3D) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+          }
+        });
+      }, 200); // Espera 200 milisegundos a que los STL carguen
+      this.robotModel.scale.set(3, 3, 3);
 
       this.scene.add(this.robotModel);
-      // Luego agrega cámara, luz y renderer con Three.js
     });
   }
 
@@ -141,27 +141,27 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
     switch (joint) {
       case 'joint1':
         this.angle1 = angle;
-        this.rosService.publishJointState(['joint1'], [angle/180 * Math.PI]); // Convertir a radianes
+        this.rosService.publishJointState(['joint1'], [angle / 180 * Math.PI]); // Convertir a radianes
         break;
       case 'joint2':
         this.angle2 = angle;
-        this.rosService.publishJointState(['joint2'], [angle/180 * Math.PI]);
+        this.rosService.publishJointState(['joint2'], [angle / 180 * Math.PI]);
         break;
       case 'joint3':
         this.angle3 = angle;
-        this.rosService.publishJointState(['joint3'], [angle/180 * Math.PI]);
+        this.rosService.publishJointState(['joint3'], [angle / 180 * Math.PI]);
         break;
       case 'joint4':
         this.angle4 = angle;
-        this.rosService.publishJointState(['joint4'], [angle/180 * Math.PI]);
+        this.rosService.publishJointState(['joint4'], [angle / 180 * Math.PI]);
         break;
       case 'joint5':
         this.angle5 = angle;
-        this.rosService.publishJointState(['joint5'], [angle/180 * Math.PI]);
+        this.rosService.publishJointState(['joint5'], [angle / 180 * Math.PI]);
         break;
       case 'joint6':
         this.angle6 = angle;
-        this.rosService.publishJointState(['joint6'], [angle/180 * Math.PI]);
+        this.rosService.publishJointState(['joint6'], [angle / 180 * Math.PI]);
         break;
     }
   }
