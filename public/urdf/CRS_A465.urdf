@@ -3,7 +3,7 @@
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
-  name="CRS_A465">
+  name="CRS_A465_ok_ok">
   <link
     name="eslabon_base">
     <inertial>
@@ -26,14 +26,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_base.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_base.STL" />
       </geometry>
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel negro.p2m" />
+          rgba="0.2 0.2 0.2 1" />
       </material>
     </visual>
     <collision>
@@ -42,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_base.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_base.STL" />
       </geometry>
     </collision>
   </link>
@@ -68,14 +66,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_1.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_1.STL" />
       </geometry>
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel negro.p2m" />
+          rgba="0.2 0.2 0.2 1" />
       </material>
     </visual>
     <collision>
@@ -84,7 +80,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_1.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_1.STL" />
       </geometry>
     </collision>
   </link>
@@ -118,8 +114,8 @@
         value="4.9089" />
       <inertia
         ixx="0.062922"
-        ixy="7.2484E-19"
-        ixz="9.0738E-20"
+        ixy="7.7685E-19"
+        ixz="8.7309E-20"
         iyy="0.014194"
         iyz="0.0027173"
         izz="0.065705" />
@@ -130,14 +126,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_2.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_2.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel blanco.p2m" />
       </material>
     </visual>
     <collision>
@@ -146,7 +140,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_2.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -154,7 +148,7 @@
     name="junta_1_2"
     type="revolute">
     <origin
-      xyz="0 0.33 -8E-05"
+      xyz="0 0.330000000000001 -7.99999999999274E-05"
       rpy="0 0 0" />
     <parent
       link="eslabon_1" />
@@ -192,14 +186,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_3.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_3.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel blanco.p2m" />
       </material>
     </visual>
     <collision>
@@ -208,7 +200,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_3.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -216,14 +208,14 @@
     name="junta_2_3"
     type="revolute">
     <origin
-      xyz="0 0.305 0.000100000000000017"
+      xyz="0 0.305 0.0001"
       rpy="0 0 0" />
     <parent
       link="eslabon_2" />
     <child
       link="eslabon_3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.9199"
       upper="1.9199"
@@ -254,14 +246,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_4.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_4.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel blanco.p2m" />
       </material>
     </visual>
     <collision>
@@ -270,7 +260,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_4.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_4.STL" />
       </geometry>
     </collision>
   </link>
@@ -304,10 +294,10 @@
         value="0.37918" />
       <inertia
         ixx="0.00037262"
-        ixy="-3.3603E-21"
+        ixy="-1.706E-21"
         ixz="5.8986E-21"
         iyy="0.00025382"
-        iyz="-1.7584E-20"
+        iyz="-1.8062E-20"
         izz="0.00044766" />
     </inertial>
     <visual>
@@ -316,14 +306,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_5.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_5.STL" />
       </geometry>
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel negro.p2m" />
+          rgba="0.2 0.2 0.2 1" />
       </material>
     </visual>
     <collision>
@@ -332,7 +320,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_5.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_5.STL" />
       </geometry>
     </collision>
   </link>
@@ -347,7 +335,7 @@
     <child
       link="eslabon_5" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.8326"
       upper="1.8326"
@@ -378,14 +366,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_6.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_6.STL" />
       </geometry>
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRS_A465/textures/cast carbon steel negro.p2m" />
+          rgba="0.2 0.2 0.2 1" />
       </material>
     </visual>
     <collision>
@@ -394,7 +380,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://CRS_A465/meshes/eslabon_6.STL" />
+          filename="package://CRS_A465_ok_ok/meshes/eslabon_6.STL" />
       </geometry>
     </collision>
   </link>
