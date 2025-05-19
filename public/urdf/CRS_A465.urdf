@@ -114,8 +114,8 @@
         value="4.9089" />
       <inertia
         ixx="0.062922"
-        ixy="2.989E-19"
-        ixz="1.3863E-18"
+        ixy="3.1566E-19"
+        ixz="1.4814E-18"
         iyy="0.065705"
         iyz="-0.0027173"
         izz="0.014194" />
@@ -215,7 +215,7 @@
     <child
       link="eslabon_3" />
     <axis
-      xyz="0 -1 0" />
+      xyz="0 1 0" />
     <limit
       lower="-1.9199"
       upper="1.9199"
@@ -294,10 +294,10 @@
         value="0.37918" />
       <inertia
         ixx="0.00037262"
-        ixy="-8.6135E-21"
-        ixz="-1.1175E-20"
+        ixy="-8.545E-21"
+        ixz="-1.2543E-20"
         iyy="0.00044766"
-        iyz="-1.1906E-20"
+        iyz="-1.1376E-20"
         izz="0.00025382" />
     </inertial>
     <visual>
@@ -335,7 +335,7 @@
     <child
       link="eslabon_5" />
     <axis
-      xyz="0 -1 0" />
+      xyz="0 1 0" />
     <limit
       lower="-1.8326"
       upper="1.8326"
@@ -371,7 +371,7 @@
       <material
         name="">
         <color
-          rgba="0.2 0.2 0.2 1" />
+          rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
