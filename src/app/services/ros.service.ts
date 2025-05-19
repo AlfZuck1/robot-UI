@@ -8,7 +8,7 @@ export class RosService {
   private ros: ROSLIB.Ros;
   private jointStateTopic: ROSLIB.Topic;
   private readonly API_URL = 'http://localhost:8000/send_command';
-  private readonly PASSWORD = 'ym81ZHB737q9M1ZWg2LFww';
+  private readonly PASSWORD = 'E9wW8XulJJka9cyK1sCSrA';
 
   constructor() {
     this.ros = new ROSLIB.Ros({

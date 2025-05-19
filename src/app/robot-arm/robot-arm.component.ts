@@ -139,29 +139,29 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
   moveJoint(joint: string, angle: number) {
     switch (joint) {
-      case 'joint1':
+      case 'junta_0_1':
         this.angle1 = angle;
-        this.rosService.publishJointState(['joint1'], [angle / 180 * Math.PI]); // Convertir a radianes
+        this.rosService.publishJointState(['junta_0_1'], [angle / 180 * Math.PI]); // Convertir a radianes
         break;
-      case 'joint2':
+      case 'junta_1_2':
         this.angle2 = angle;
-        this.rosService.publishJointState(['joint2'], [angle / 180 * Math.PI]);
+        this.rosService.publishJointState(['junta_1_2'], [angle / 180 * Math.PI]);
         break;
-      case 'joint3':
+      case 'junta_2_3':
         this.angle3 = angle;
-        this.rosService.publishJointState(['joint3'], [angle / 180 * Math.PI]);
+        this.rosService.publishJointState(['junta_2_3'], [angle / 180 * Math.PI]);
         break;
-      case 'joint4':
+      case 'junta_3_4':
         this.angle4 = angle;
-        this.rosService.publishJointState(['joint4'], [angle / 180 * Math.PI]);
+        this.rosService.publishJointState(['junta_3_4'], [angle / 180 * Math.PI]);
         break;
-      case 'joint5':
+      case 'junta_4_5':
         this.angle5 = angle;
-        this.rosService.publishJointState(['joint5'], [angle / 180 * Math.PI]);
+        this.rosService.publishJointState(['junta_4_5'], [angle / 180 * Math.PI]);
         break;
-      case 'joint6':
+      case 'junta_5_6':
         this.angle6 = angle;
-        this.rosService.publishJointState(['joint6'], [angle / 180 * Math.PI]);
+        this.rosService.publishJointState(['junta_5_6'], [angle / 180 * Math.PI]);
         break;
     }
   }
