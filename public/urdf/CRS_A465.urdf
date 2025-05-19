@@ -3,26 +3,22 @@
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot
-<<<<<<< HEAD
-  name="CRSA465">
-=======
-  name="CRS_A465_ok_ok">
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+  name="CRS_A465">
   <link
     name="eslabon_base">
     <inertial>
       <origin
-        xyz="0.0033005 0.075392 1.0658E-10"
+        xyz="0.0033005 -1.0658E-10 0.075392"
         rpy="0 0 0" />
       <mass
         value="5.3549" />
       <inertia
         ixx="0.026465"
-        ixy="-0.00085077"
-        ixz="5.7942E-11"
-        iyy="0.028818"
-        iyz="-1.2428E-10"
-        izz="0.027827" />
+        ixy="-5.7942E-11"
+        ixz="-0.00085077"
+        iyy="0.027827"
+        iyz="1.2428E-10"
+        izz="0.028818" />
     </inertial>
     <visual>
       <origin
@@ -30,22 +26,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_base.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_base.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_base.STL" />
       </geometry>
       <material
         name="">
         <color
-<<<<<<< HEAD
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel negro.p2m" />
-=======
           rgba="0.2 0.2 0.2 1" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -54,11 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_base.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_base.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_base.STL" />
       </geometry>
     </collision>
   </link>
@@ -66,17 +48,17 @@
     name="eslabon_1">
     <inertial>
       <origin
-        xyz="-3.6863E-08 0.29206 -5.1363E-08"
+        xyz="-3.6863E-08 5.1363E-08 0.29206"
         rpy="0 0 0" />
       <mass
         value="7.6604" />
       <inertia
         ixx="0.17917"
-        ixy="-7.5108E-08"
-        ixz="1.131E-07"
-        iyy="0.16191"
-        iyz="1.514E-08"
-        izz="0.033062" />
+        ixy="-1.131E-07"
+        ixz="-7.5108E-08"
+        iyy="0.033062"
+        iyz="-1.514E-08"
+        izz="0.16191" />
     </inertial>
     <visual>
       <origin
@@ -84,22 +66,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_1.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_1.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_1.STL" />
       </geometry>
       <material
         name="">
         <color
-<<<<<<< HEAD
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel negro.p2m" />
-=======
           rgba="0.2 0.2 0.2 1" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -108,11 +80,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_1.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_1.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_1.STL" />
       </geometry>
     </collision>
   </link>
@@ -127,7 +95,7 @@
     <child
       link="eslabon_1" />
     <axis
-      xyz="0 1 0" />
+      xyz="0 0 1" />
     <limit
       lower="-3.0543"
       upper="3.0543"
@@ -140,17 +108,17 @@
     name="eslabon_2">
     <inertial>
       <origin
-        xyz="-1.3878E-17 0.092888 -0.0026097"
+        xyz="0 0.0026097 0.092888"
         rpy="0 0 0" />
       <mass
         value="4.9089" />
       <inertia
         ixx="0.062922"
-        ixy="7.7685E-19"
-        ixz="8.7309E-20"
-        iyy="0.014194"
-        iyz="0.0027173"
-        izz="0.065705" />
+        ixy="2.989E-19"
+        ixz="1.3863E-18"
+        iyy="0.065705"
+        iyz="-0.0027173"
+        izz="0.014194" />
     </inertial>
     <visual>
       <origin
@@ -158,21 +126,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_2.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_2.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_2.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-<<<<<<< HEAD
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel blanco.p2m" />
-=======
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -181,11 +140,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_2.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_2.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_2.STL" />
       </geometry>
     </collision>
   </link>
@@ -193,14 +148,14 @@
     name="junta_1_2"
     type="revolute">
     <origin
-      xyz="0 0.330000000000001 -7.99999999999274E-05"
+      xyz="0 8E-05 0.33"
       rpy="0 0 0" />
     <parent
       link="eslabon_1" />
     <child
       link="eslabon_2" />
     <axis
-      xyz="0 0 -1" />
+      xyz="0 1 0" />
     <limit
       lower="-1.5708"
       upper="1.5708"
@@ -213,17 +168,17 @@
     name="eslabon_3">
     <inertial>
       <origin
-        xyz="6.0536E-08 0.0085436 2.6493E-08"
+        xyz="6.0536E-08 -2.6493E-08 0.0085436"
         rpy="0 0 0" />
       <mass
         value="0.84552" />
       <inertia
         ixx="0.0011491"
-        ixy="-9.5319E-10"
-        ixz="-1.4518E-07"
-        iyy="0.0011924"
-        iyz="-4.2164E-10"
-        izz="0.0013629" />
+        ixy="1.4482E-07"
+        ixz="-9.5319E-10"
+        iyy="0.0013629"
+        iyz="4.2164E-10"
+        izz="0.0011924" />
     </inertial>
     <visual>
       <origin
@@ -231,21 +186,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_3.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_3.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_3.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-<<<<<<< HEAD
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel blanco.p2m" />
-=======
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -254,11 +200,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_3.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_3.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_3.STL" />
       </geometry>
     </collision>
   </link>
@@ -266,14 +208,14 @@
     name="junta_2_3"
     type="revolute">
     <origin
-      xyz="0 0.305 0.0001"
+      xyz="0 -0.0001 0.305"
       rpy="0 0 0" />
     <parent
       link="eslabon_2" />
     <child
       link="eslabon_3" />
     <axis
-      xyz="0 0 -1" />
+      xyz="0 -1 0" />
     <limit
       lower="-1.9199"
       upper="1.9199"
@@ -286,17 +228,17 @@
     name="eslabon_4">
     <inertial>
       <origin
-        xyz="0 0.093313 0"
+        xyz="4.1633E-17 0 0.093313"
         rpy="0 0 0" />
       <mass
         value="2.1712" />
       <inertia
         ixx="0.011152"
-        ixy="-1.8312E-19"
-        ixz="-4.346E-12"
-        iyy="0.0040383"
-        iyz="-2.1281E-19"
-        izz="0.010864" />
+        ixy="4.346E-12"
+        ixz="-7.4605E-19"
+        iyy="0.010864"
+        iyz="-1.614E-18"
+        izz="0.0040383" />
     </inertial>
     <visual>
       <origin
@@ -304,21 +246,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_4.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_4.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_4.STL" />
       </geometry>
       <material
         name="">
         <color
           rgba="0.79216 0.81961 0.93333 1" />
-<<<<<<< HEAD
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel blanco.p2m" />
-=======
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -327,11 +260,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_4.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_4.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_4.STL" />
       </geometry>
     </collision>
   </link>
@@ -339,14 +268,14 @@
     name="junta_3_4"
     type="revolute">
     <origin
-      xyz="0 0.116 0"
+      xyz="0 0 0.116"
       rpy="0 0 0" />
     <parent
       link="eslabon_3" />
     <child
       link="eslabon_4" />
     <axis
-      xyz="0 1 0" />
+      xyz="0 0 1" />
     <limit
       lower="-3.1416"
       upper="3.1416"
@@ -359,17 +288,17 @@
     name="eslabon_5">
     <inertial>
       <origin
-        xyz="0 0.0094718 0"
+        xyz="0 -5.5511E-17 0.0094718"
         rpy="0 0 0" />
       <mass
         value="0.37918" />
       <inertia
         ixx="0.00037262"
-        ixy="-1.706E-21"
-        ixz="5.8986E-21"
-        iyy="0.00025382"
-        iyz="-1.8062E-20"
-        izz="0.00044766" />
+        ixy="-8.6135E-21"
+        ixz="-1.1175E-20"
+        iyy="0.00044766"
+        iyz="-1.1906E-20"
+        izz="0.00025382" />
     </inertial>
     <visual>
       <origin
@@ -377,22 +306,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_5.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_5.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_5.STL" />
       </geometry>
       <material
         name="">
         <color
-<<<<<<< HEAD
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel negro.p2m" />
-=======
           rgba="0.2 0.2 0.2 1" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -401,11 +320,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_5.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_5.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_5.STL" />
       </geometry>
     </collision>
   </link>
@@ -413,14 +328,14 @@
     name="junta_4_5"
     type="revolute">
     <origin
-      xyz="0 0.214 0"
+      xyz="0 0 0.214"
       rpy="0 0 0" />
     <parent
       link="eslabon_4" />
     <child
       link="eslabon_5" />
     <axis
-      xyz="0 0 -1" />
+      xyz="0 -1 0" />
     <limit
       lower="-1.8326"
       upper="1.8326"
@@ -433,17 +348,17 @@
     name="eslabon_6">
     <inertial>
       <origin
-        xyz="0 0.007846 0"
+        xyz="0 -1.1102E-16 0.007846"
         rpy="0 0 0" />
       <mass
         value="0.035974" />
       <inertia
         ixx="7.4902E-06"
-        ixy="-2.323E-21"
-        ixz="3.0316E-37"
-        iyy="1.356E-05"
-        iyz="-5.3506E-22"
-        izz="7.4902E-06" />
+        ixy="1.72E-36"
+        ixz="8.0534E-22"
+        iyy="7.4902E-06"
+        iyz="4.3702E-21"
+        izz="1.356E-05" />
     </inertial>
     <visual>
       <origin
@@ -451,22 +366,12 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_6.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_6.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_6.STL" />
       </geometry>
       <material
         name="">
         <color
-<<<<<<< HEAD
-          rgba="0.79216 0.81961 0.93333 1" />
-        <texture
-          filename="package://CRSA465/textures/cast carbon steel negro.p2m" />
-=======
           rgba="0.2 0.2 0.2 1" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
       </material>
     </visual>
     <collision>
@@ -475,11 +380,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-<<<<<<< HEAD
-          filename="package://CRSA465/meshes/eslabon_6.STL" />
-=======
-          filename="package://CRS_A465_ok_ok/meshes/eslabon_6.STL" />
->>>>>>> 805e307f335687c5b39f1a6f0ad8df3bdd3c9269
+          filename="package://CRS_A465/meshes/eslabon_6.STL" />
       </geometry>
     </collision>
   </link>
@@ -487,14 +388,14 @@
     name="junta_5_6"
     type="revolute">
     <origin
-      xyz="0 0.0635000000000001 0"
+      xyz="0 0 0.0635"
       rpy="0 0 0" />
     <parent
       link="eslabon_5" />
     <child
       link="eslabon_6" />
     <axis
-      xyz="0 1 0" />
+      xyz="0 0 1" />
     <limit
       lower="-3.1416"
       upper="3.1416"
