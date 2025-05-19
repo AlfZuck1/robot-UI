@@ -27,7 +27,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
   angle1: number = 0;
   angle2: number = 0;
-  angle3: number = 90;
+  angle3: number = 0;
   angle4: number = 0;
   angle5: number = 0;
   angle6: number = 0;
@@ -101,6 +101,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
       console.log('URDF recibido', value);
       // Cargar el modelo URDF
       this.robotModel = loader.parse(value);
+      this.robotModel.rotation.x = -Math.PI / 2;
       setTimeout(() => {
         this.robotModel.traverse((child: THREE.Object3D) => {
           if (child instanceof THREE.Mesh) {
