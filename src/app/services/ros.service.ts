@@ -7,12 +7,12 @@ import ROSLIB from 'roslib';
 export class RosService {
   private ros: ROSLIB.Ros;
   private jointStateTopic: ROSLIB.Topic;
-  private readonly API_URL = 'http://localhost:8000/send_command';
+  private readonly API_URL = 'http://192.168.101.108:8000/send_command';
   private readonly PASSWORD = 'uOclytaARxa5d4t_vNPpmA';
 
   constructor() {
     this.ros = new ROSLIB.Ros({
-      url: 'ws://localhost:9090'
+      url: 'ws://192.168.101.108:9090'
     });
 
     this.ros.on('connection', () => {
