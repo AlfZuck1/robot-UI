@@ -5,6 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { RosService } from '../services/ros.service';
 import { CommonModule } from '@angular/common';
+import { int } from 'three/tsl';
 
 @Component({
   selector: 'app-robot-arm',
@@ -81,7 +82,12 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     // Cámara
     this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    this.camera.position.set(0, 3, -4);
+    if (this.isSmallScreen) {
+      this.camera.position.set(0, 5.5, -5.5);
+    }
+    else {
+      this.camera.position.set(0, 3, -4);
+    }
     this.camera.lookAt(0, 1.0, 0);
 
     // Controles de órbita
@@ -135,6 +141,14 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
         joint.setJointValue(position);
       }
     }
+    // Actualizar ángulos de las juntas y redondear a enteros
+    this.angle1 = Math.round(jointPositions[0] * 180 / Math.PI);
+    this.angle2 = Math.round(jointPositions[1] * 180 / Math.PI);
+    this.angle3 = Math.round(jointPositions[2] * 180 / Math.PI);
+    this.angle4 = Math.round(jointPositions[3] * 180 / Math.PI);
+    this.angle5 = Math.round(jointPositions[4] * 180 / Math.PI);
+    this.angle6 = Math.round(jointPositions[5] * 180 / Math.PI);
+
   }
 
 
@@ -328,7 +342,12 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
   resetCameraPosition() {
     if (!this.camera) return;
-    this.camera.position.set(0, 3, -4);
+    if (this.isSmallScreen) {
+      this.camera.position.set(0, 5.5, -5.5);
+    }
+    else {
+      this.camera.position.set(0, 3, -4);
+    }
     this.camera.lookAt(0, 1.0, 0);
   }
 }

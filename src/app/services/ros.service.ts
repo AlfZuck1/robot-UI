@@ -8,7 +8,7 @@ export class RosService {
   private ros: ROSLIB.Ros;
   private jointStateTopic: ROSLIB.Topic;
   private readonly API_URL = 'http://192.168.101.108:8000/send_command';
-  private readonly PASSWORD = 'uOclytaARxa5d4t_vNPpmA';
+  private readonly PASSWORD = '7JMXu09CfSpNAfIjXZNq9A';
 
   constructor() {
     this.ros = new ROSLIB.Ros({
@@ -63,7 +63,7 @@ export class RosService {
   }
 
   publishJointState(names: string[], positions: number[]) {
-    /*const payload = {
+    const payload = {
       password: this.PASSWORD,
       name: names,
       position: positions
@@ -85,11 +85,11 @@ export class RosService {
       .catch(err => {
         console.error('Error al conectar con API:', err);
       });
-  }*/
-    this.jointStateTopic.publish(new ROSLIB.Message({
+  
+    /*this.jointStateTopic.publish(new ROSLIB.Message({
       name: names,
       position: positions
     }));
-    console.log('Estado publicado con éxito', names, positions);
+    console.log('Estado publicado con éxito', names, positions);*/
   }
 }
