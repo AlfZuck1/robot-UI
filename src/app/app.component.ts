@@ -4,6 +4,7 @@ import { RobotArmComponent } from "./robot-arm/robot-arm.component";
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RobotArmComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

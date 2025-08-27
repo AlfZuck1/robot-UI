@@ -5,9 +5,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { RosService } from '../services/ros.service';
 import { CommonModule } from '@angular/common';
-import { int } from 'three/tsl';
 
 @Component({
+  standalone: true,
   selector: 'app-robot-arm',
   imports: [FormsModule, CommonModule],
   templateUrl: './robot-arm.component.html',
@@ -180,6 +180,11 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
       Object.keys(jointMap),
       angles
     );
+  }
+
+  rotate6Joint(angle: number) {
+    const num = angle / 360;
+    this.rosService.publishJoint6Command(num);
   }
 
   loadRobotModel() {

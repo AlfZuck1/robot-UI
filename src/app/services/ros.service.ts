@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import ROSLIB from 'roslib';
+import { environment } from '../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
@@ -7,12 +8,13 @@ import ROSLIB from 'roslib';
 export class RosService {
   private ros: ROSLIB.Ros;
   private jointStateTopic: ROSLIB.Topic;
-  private readonly API_URL = 'http://192.168.101.108:8000/send_command';
-  private readonly PASSWORD = '7JMXu09CfSpNAfIjXZNq9A';
+  private readonly API_URL = environment.API_URL;
+  private readonly API_PASSWORD = environment.API_PASSWORD;
+  private readonly ROSBRIDGE_SERVER_URL = environment.ROSBRIDGE_SERVER_URL;
 
   constructor() {
     this.ros = new ROSLIB.Ros({
-      url: 'ws://192.168.101.108:9090'
+      url: this.ROSBRIDGE_SERVER_URL
     });
 
     this.ros.on('connection', () => {
@@ -64,12 +66,12 @@ export class RosService {
 
   publishJointState(names: string[], positions: number[]) {
     const payload = {
-      password: this.PASSWORD,
+      password: this.API_PASSWORD,
       name: names,
       position: positions
     };
 
-    fetch(this.API_URL, {
+    fetch(this.API_URL + '/send_command', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -91,5 +93,30 @@ export class RosService {
       position: positions
     }));
     console.log('Estado publicado con éxito', names, positions);*/
+  }
+
+  // Nueva función para publicar comando en joint6
+  publishJoint6Command(value: number) {
+    const payload = {
+      password: this.API_PASSWORD,
+      value: value
+    };
+
+    fetch(this.API_URL + '/send_joint6_command', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const err = await response.json();
+          console.error('Error publicando joint6:', err.detail || response.statusText);
+          return;
+        }
+        console.log('Joint6 command publicado con éxito:', value);
+      })
+      .catch(err => {
+        console.error('Error al conectar con API:', err);
+      });
   }
 }

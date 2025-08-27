@@ -115,3 +115,57 @@ def generate_launch_description():
 #Para realizar la comunicación entre el robot y el cliente web, se debe instalar el rosbridge en otra terminal y ejecutar el rosbridge
     sudo apt install ros-humble-rosbridge-server
     ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+
+
+
+##### Posibles errores
+    # Si el robot_state_publisher deja de funcionar una posible causa es la sincronización con el tiempo
+    # ¿Qué hacer?
+    # En ubuntu:
+    sudo apt update
+    sudo apt install ntpdate
+    sudo timedatectl set-ntp true
+    sudo ntpdate ntp.ubuntu.com
+    # Sincroinizar tiempo de windows también
+
+
+### Montar microRos
+    sudo apt update
+    sudo apt install -y python3-colcon-common-extensions python3-pip
+    pip3 install -U colcon-ros-bundle empy setuptools
+    sudo apt install ros-humble-micro-ros-agent
+
+    sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+    -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+    # Revisar que con "nano /etc/apt/sources.list.d/ros2-latest.list" tenga lo siguiente si es que hay problemas
+    deb [arch=amd64 signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu jammy main
+
+    # Clonar el repositorio oficial del agente humble y msgs
+    cd ros2_ws/src
+    git clone -b humble https://github.com/micro-ROS/micro-ROS-Agent.git
+    git clone -b humble https://github.com/micro-ROS/micro_ros_msgs.git
+
+    # Instalar dependencias
+    rosdep update
+    rosdep install --from-paths src --ignore-src -y
+    colcon build
+    source install/setup.bash
+
+    # Ejecutar el agente por wifi
+    ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888 --dev 0.0.0.0
+
+    # Correr el proxy de python "udp_proxy.py" para redirigir los mensajes.
+
+    # Instalar usbipd para compartir el puerto serial de windows a la máquina virtual
+    # Desde powershell:
+    winget install usbipd
+    Register-ArgumentCompleter -Native -CommandName usbipd -ScriptBlock {
+       param($commandName, $wordToComplete, $cursorPosition)
+       usbipd [suggest:$cursorPosition] "$wordToComplete" | ForEach-Object {
+           [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+       }
+    }
+    usbipd --help
+    usbipd list
+    usbipd attach --wsl --busid=<BUSID> (1-2, 1-3)
