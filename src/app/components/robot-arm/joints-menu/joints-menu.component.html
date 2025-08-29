@@ -1,0 +1,99 @@
+<div class="controls-container">
+    <button class="menu-toggle" (click)="toggleMenu()" aria-label="Abrir menú" *ngIf="!menuOpen && isSmallScreen">
+        ☰ Controles
+    </button>
+
+    <div class="controls" [class.open]="menuOpen">
+        <h2>Control del Brazo Robótico</h2>
+        <button class="close-menu" (click)="toggleMenu()" aria-label="Cerrar menú" *ngIf="menuOpen">
+            ✕
+        </button>
+        <button class="manual-mode" (click)="toggleManual()" aria-label="Cambiar modo">
+            👁️
+        </button>
+        <div class="joint-controls">
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 1 ({{ pointAngles[0] }}°)
+                    <input class="joint-slider" type="range" min="-175" max="175" [(ngModel)]="pointAngles[0]"
+                        (input)="moveJoint('junta_0_1', pointAngles[0])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 2 ({{ pointAngles[1] }}°)
+                    <input class="joint-slider" type="range" min="-90" max="90" [(ngModel)]="pointAngles[1]"
+                        (input)="moveJoint('junta_1_2', pointAngles[1])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 3 ({{ pointAngles[2] }}°)
+                    <input class="joint-slider" type="range" min="-110" max="110" [(ngModel)]="pointAngles[2]"
+                        (input)="moveJoint('junta_2_3', pointAngles[2])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 4 ({{ pointAngles[3] }}°)
+                    <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[3]"
+                        (input)="moveJoint('junta_3_4', pointAngles[3])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 5 ({{ pointAngles[4] }}°)
+                    <input class="joint-slider" type="range" min="-105" max="105" [(ngModel)]="pointAngles[4]"
+                        (input)="moveJoint('junta_4_5', pointAngles[4])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Ángulo 6 ({{ pointAngles[5] }}°)
+                    <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[5]"
+                        (input)="moveJoint('junta_5_6', pointAngles[5])">
+                </label>
+            </div>
+            <div class="joint-control">
+                <label class="joint-label">
+                    Tiempo ({{ robot.time() }}s)
+                    <input class="joint-slider" type="range" min="0" max="30" [(ngModel)]="robot.time">
+                </label>
+            </div>
+        </div>
+        <button class="reset-camera-button" (click)="resetCameraPosition()">Restablecer posición de la cámara</button>
+        <button class="send-command-button" (click)="rotate6Joint(robot.angle6())">Enviar esfuerzo al motor 6</button>
+
+        <!-- Trayectorias -->
+        <div class="trajectories-container">
+            <h2 class="trajectories-title">Trayectorias</h2>
+
+            <div class="trajectory-selector">
+                <label class="trajectory-label">Seleccionar Trayectoria:</label>
+                <select class="trajectory-select" [(ngModel)]="newTrajectory" (change)="onTrajectoryChange()">
+                    <option *ngFor="let t of trajectories" [ngValue]="t">{{ t.name }}</option>
+                </select>
+            </div>
+
+            <div class="trajectory-name">
+                <input type="text" class="trajectory-name-input" [(ngModel)]="newTrajectory.name"
+                    placeholder="Nombre de la trayectoria" />
+            </div>
+
+            <div class="trajectory-controls">
+                <button class="add-point-btn" (click)="addPoint()">Agregar Punto</button>
+                <button class="save-trajectory-btn" (click)="addTrajectory()">Guardar Trayectoria</button>
+                <button class="remove-trajectory-btn" (click)="removeTrajectory()">Eliminar Trayectoria</button>
+            </div>
+
+            <ul class="points-list">
+                <li class="point-item" *ngFor="let point of newTrajectory.points; let idx = index">
+                    <span class="point-info" (click)="moveToPoint(point)">Posición {{ idx + 1 }} {{ point.positions }} - Tiempo: {{ point.time }}s</span>
+                    <button class="update-point-btn" (click)="updatePoint(idx)">Actualizar</button>
+                </li>
+            </ul>
+
+            <div class="trajectory-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        </div>
+    </div>
+</div>

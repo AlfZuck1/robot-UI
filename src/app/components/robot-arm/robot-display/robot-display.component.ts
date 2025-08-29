@@ -1,19 +1,18 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { AfterViewInit, Component, effect, ElementRef, ViewChild } from '@angular/core';
+import { RosService } from '../../../services/ros.service';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
-import { RosService } from '../services/ros.service';
-import { CommonModule } from '@angular/common';
+import { UiStateService } from '../../../services/ui-state.service';
+import { RobotStateService } from '../../../services/robot-state.service';
 
 @Component({
-  standalone: true,
-  selector: 'app-robot-arm',
-  imports: [FormsModule, CommonModule],
-  templateUrl: './robot-arm.component.html',
-  styleUrl: './robot-arm.component.scss'
+  selector: 'app-robot-display',
+  imports: [],
+  templateUrl: './robot-display.component.html',
+  styleUrl: './robot-display.component.scss'
 })
-export class RobotArmComponent implements OnInit, AfterViewInit {
+export class RobotDisplayComponent implements AfterViewInit {
   @ViewChild('canvasContainer', { static: true }) canvasContainer!: ElementRef;
   isSmallScreen: boolean = false;
   menuOpen: boolean = false;
@@ -29,33 +28,64 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
   joint5!: THREE.Object3D;
   joint6!: THREE.Object3D;
 
-  angle1: number = 0;
-  angle2: number = 0;
-  angle3: number = 0;
-  angle4: number = 0;
-  angle5: number = 0;
-  angle6: number = 0;
-
   robotModel: any;
 
-  constructor(private rosService: RosService) {
-    // Detectar si la pantalla es pequeña
-    this.isSmallScreen = window.innerWidth < 768;
+  controls!: OrbitControls;
 
-    // Escuchar cambios de tamaño de ventana
+  constructor(private rosService: RosService, 
+    private uiStateService: UiStateService,
+    private robot: RobotStateService
+  ) {
+    this.uiStateService.isSmallScreen$.subscribe(isSmall => {
+      this.isSmallScreen = isSmall;
+      this.resetCameraPosition();
+    });
+
+    this.uiStateService.menuOpen$.subscribe(menuOpen => {
+      this.menuOpen = menuOpen;
+      setTimeout(() => {
+        const w = this.canvasContainer.nativeElement.clientWidth;
+        const h = this.canvasContainer.nativeElement.clientHeight;
+        this.camera.aspect = w / h;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(w, h, false);
+      }, 200);
+    });
+
     window.addEventListener('resize', () => {
-      this.isSmallScreen = window.innerWidth < 768;
-      if (this.isSmallScreen) {
-        this.resetCameraPosition();
+      const small = window.innerWidth < 768;
+      this.uiStateService.setSmallScreen(small);
+    });
+
+    this.uiStateService.resetCamera$.subscribe(() => {
+      this.resetCameraPosition();
+    });
+
+    effect(() => {
+      const anglesRad = [
+        this.robot.angle1() * Math.PI / 180,
+        this.robot.angle2() * Math.PI / 180,
+        this.robot.angle3() * Math.PI / 180,
+        this.robot.angle4() * Math.PI / 180,
+        this.robot.angle5() * Math.PI / 180,
+        this.robot.angle6() * Math.PI / 180,
+      ];
+
+      if (this.robotModel) {
+        const names = ['junta_0_1', 'junta_1_2', 'junta_2_3', 'junta_3_4', 'junta_4_5', 'junta_5_6'];
+        for (let i = 0; i < names.length; i++) {
+          const joint = this.robotModel.joints[names[i]];
+          if (joint) {
+            joint.setJointValue(anglesRad[i]);
+          }
+        }
       }
     });
-   }
+  }
 
   sendMessage() {
     this.rosService.publishExample();
   }
-
-  ngOnInit(): void { }
 
   ngAfterViewInit(): void {
     this.initScene();
@@ -77,7 +107,9 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
     const width = this.canvasContainer.nativeElement.clientWidth;
     const height = this.canvasContainer.nativeElement.clientHeight;
-    this.renderer.setSize(width, height);
+    this.renderer.setSize(width, height, false);
+    this.renderer.domElement.style.width = '100%';
+    this.renderer.domElement.style.height = '100%';
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
 
     // Cámara
@@ -124,67 +156,29 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
       const h = this.canvasContainer.nativeElement.clientHeight;
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(w, h);
+      this.renderer.setSize(w, h, false);
     });
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.target.set(0, 1.0, 0);
+    this.controls.update();
   }
 
   updateRobotMovement(message: any) {
-    const jointNames = message.name;
     const jointPositions = message.position;
 
-    for (let i = 0; i < jointNames.length; i++) {
-      const jointName = jointNames[i];
-      const position = jointPositions[i];
-
-      const joint = this.robotModel.joints[jointName];
-      if (joint) {
-        joint.setJointValue(position);
-      }
-    }
-    // Actualizar ángulos de las juntas y redondear a enteros
-    this.angle1 = Math.round(jointPositions[0] * 180 / Math.PI);
-    this.angle2 = Math.round(jointPositions[1] * 180 / Math.PI);
-    this.angle3 = Math.round(jointPositions[2] * 180 / Math.PI);
-    this.angle4 = Math.round(jointPositions[3] * 180 / Math.PI);
-    this.angle5 = Math.round(jointPositions[4] * 180 / Math.PI);
-    this.angle6 = Math.round(jointPositions[5] * 180 / Math.PI);
-
+    this.robot.angle1.set(Math.round(jointPositions[0] * 180 / Math.PI));
+    this.robot.angle2.set(Math.round(jointPositions[1] * 180 / Math.PI));
+    this.robot.angle3.set(Math.round(jointPositions[2] * 180 / Math.PI));
+    this.robot.angle4.set(Math.round(jointPositions[3] * 180 / Math.PI));
+    this.robot.angle5.set(Math.round(jointPositions[4] * 180 / Math.PI));
+    this.robot.angle6.set(Math.round(jointPositions[5] * 180 / Math.PI));
+    
   }
-
 
   animate() {
     requestAnimationFrame(() => this.animate());
     this.renderer.render(this.scene, this.camera);
-  }
-
-  moveJoint(joint: string, angle: number) {
-    const jointMap: { [key: string]: keyof RobotArmComponent } = {
-      'junta_0_1': 'angle1',
-      'junta_1_2': 'angle2',
-      'junta_2_3': 'angle3',
-      'junta_3_4': 'angle4',
-      'junta_4_5': 'angle5',
-      'junta_5_6': 'angle6'
-    };
-
-    if (jointMap[joint]) {
-      (this as any)[jointMap[joint]] = angle;
-    }
-
-    const angles = [
-      this.angle1, this.angle2, this.angle3,
-      this.angle4, this.angle5, this.angle6
-    ].map(deg => deg * Math.PI / 180);
-
-    this.rosService.publishJointState(
-      Object.keys(jointMap),
-      angles
-    );
-  }
-
-  rotate6Joint(angle: number) {
-    const num = angle / 360;
-    this.rosService.publishJoint6Command(num);
   }
 
   loadRobotModel() {
@@ -200,7 +194,7 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
       try {
         this.robotModel = loader.parse(value);
         this.robotModel.rotation.x = -Math.PI / 2;
-        setTimeout(() => {  
+        setTimeout(() => {
           // Mejor manejo de sombras para todos los meshes
           this.robotModel.traverse((child: THREE.Object3D) => {
             if ((child as THREE.Mesh).isMesh) {
@@ -347,12 +341,14 @@ export class RobotArmComponent implements OnInit, AfterViewInit {
 
   resetCameraPosition() {
     if (!this.camera) return;
+
     if (this.isSmallScreen) {
       this.camera.position.set(0, 5.5, -5.5);
-    }
-    else {
+    } else {
       this.camera.position.set(0, 3, -4);
     }
-    this.camera.lookAt(0, 1.0, 0);
+
+    this.controls.target.set(0, 1.0, 0);
+    this.controls.update();
   }
 }

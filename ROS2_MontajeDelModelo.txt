@@ -157,6 +157,8 @@ def generate_launch_description():
 
     # Correr el proxy de python "udp_proxy.py" para redirigir los mensajes.
 
+
+    ### Esto por ahora no funciona
     # Instalar usbipd para compartir el puerto serial de windows a la máquina virtual
     # Desde powershell:
     winget install usbipd
