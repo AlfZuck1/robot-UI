@@ -1,1 +1,21 @@
 <div #canvasContainer class="viewer" [class.menu-open]="menuOpen"></div>
+
+<div class="pose-display" *ngIf="tcpPose">
+  <div class="pose-section">
+    <p><strong>Posición:</strong></p>
+    <ul>
+      <li>X: {{ tcpPose.x.toFixed(2) }} m</li>
+      <li>Y: {{ tcpPose.y.toFixed(2) }} m</li>
+      <li>Z: {{ tcpPose.z.toFixed(2) }} m</li>
+    </ul>
+  </div>
+  <div class="pose-section">
+    <p><strong>Orientación:</strong></p>
+    <ul>
+      <li>x: {{ tcpPose.qx.toFixed(2) }}</li>
+      <li>y: {{ tcpPose.qy.toFixed(2) }}</li>
+      <li>z: {{ tcpPose.qz.toFixed(2) }}</li>
+      <li>w: {{ tcpPose.qw.toFixed(2) }}</li>
+    </ul>
+  </div>
+</div>

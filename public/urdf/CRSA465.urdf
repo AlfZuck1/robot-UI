@@ -6,20 +6,6 @@
   name="CRSA465">
   <link
     name="eslabon_base">
-    <inertial>
-      <origin
-        xyz="0.0033005 -1.0658E-10 0.075392"
-        rpy="0 0 0" />
-      <mass
-        value="5.3549" />
-      <inertia
-        ixx="0.026465"
-        ixy="-5.7942E-11"
-        ixz="-0.00085077"
-        iyy="0.027827"
-        iyz="1.2428E-10"
-        izz="0.028818" />
-    </inertial>
     <visual>
       <origin
         xyz="0 0 0"
@@ -44,6 +30,7 @@
       </geometry>
     </collision>
   </link>
+
   <link
     name="eslabon_1">
     <inertial>
@@ -104,6 +91,7 @@
     <calibration
       rising="3.0543" />
   </joint>
+
   <link
     name="eslabon_2">
     <inertial>
@@ -164,6 +152,7 @@
     <calibration
       rising="0.17453" />
   </joint>
+
   <link
     name="eslabon_3">
     <inertial>
@@ -224,6 +213,7 @@
     <calibration
       rising="-1.0472" />
   </joint>
+
   <link
     name="eslabon_4">
     <inertial>
@@ -284,6 +274,7 @@
     <calibration
       rising="3.14" />
   </joint>
+
   <link
     name="eslabon_5">
     <inertial>
@@ -344,6 +335,7 @@
     <calibration
       rising="0.43633" />
   </joint>
+
   <link
     name="eslabon_6">
     <inertial>
@@ -404,4 +396,44 @@
     <calibration
       rising="3.14" />
   </joint>
+
+  <!-- Efector final del CRS A465 -->
+  <link name="ee_link"/>
+
+  <joint name="junta_ee" type="fixed">
+    <parent link="eslabon_6"/>
+    <child link="ee_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/> <!-- ajusta el offset según la herramienta real -->
+  </joint>
+  
+  <ros2_control name="CRSA465" type="system">
+  <hardware>
+    <plugin>mock_components/GenericSystem</plugin>
+  </hardware>
+
+  <joint name="junta_0_1">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+  <joint name="junta_1_2">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+  <joint name="junta_2_3">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+  <joint name="junta_3_4">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+  <joint name="junta_4_5">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+  <joint name="junta_5_6">
+    <command_interface name="position"/>
+    <state_interface name="position"/>
+  </joint>
+</ros2_control>
 </robot>

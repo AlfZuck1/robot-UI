@@ -14,55 +14,95 @@
         <div class="joint-controls">
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 1 ({{ pointAngles[0] }}°)
+                    Ángulo 1 ({{ pointAngles[0].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-175" max="175" [(ngModel)]="pointAngles[0]"
                         (input)="moveJoint('junta_0_1', pointAngles[0])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 2 ({{ pointAngles[1] }}°)
+                    Ángulo 2 ({{ pointAngles[1].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-90" max="90" [(ngModel)]="pointAngles[1]"
                         (input)="moveJoint('junta_1_2', pointAngles[1])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 3 ({{ pointAngles[2] }}°)
+                    Ángulo 3 ({{ pointAngles[2].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-110" max="110" [(ngModel)]="pointAngles[2]"
                         (input)="moveJoint('junta_2_3', pointAngles[2])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 4 ({{ pointAngles[3] }}°)
+                    Ángulo 4 ({{ pointAngles[3].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[3]"
                         (input)="moveJoint('junta_3_4', pointAngles[3])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 5 ({{ pointAngles[4] }}°)
+                    Ángulo 5 ({{ pointAngles[4].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-105" max="105" [(ngModel)]="pointAngles[4]"
                         (input)="moveJoint('junta_4_5', pointAngles[4])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Ángulo 6 ({{ pointAngles[5] }}°)
+                    Ángulo 6 ({{ pointAngles[5].toFixed(2) }}°)
                     <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[5]"
                         (input)="moveJoint('junta_5_6', pointAngles[5])">
                 </label>
             </div>
             <div class="joint-control">
                 <label class="joint-label">
-                    Tiempo ({{ robot.time() }}s)
+                    Tiempo ({{ robot.time().toFixed(2) }}s)
                     <input class="joint-slider" type="range" min="0" max="30" [(ngModel)]="robot.time">
                 </label>
             </div>
         </div>
         <button class="reset-camera-button" (click)="resetCameraPosition()">Restablecer posición de la cámara</button>
         <button class="send-command-button" (click)="rotate6Joint(robot.angle6())">Enviar esfuerzo al motor 6</button>
+
+         <!-- Teach Pendant -->
+        <div class="teach-pendant">
+            <h3 class="teach-title">Control Cartesiano (Teach Pendant)</h3>
+            <div class="axis-controls">
+                <div class="axis-group">
+                    <span class="axis-label">X</span>
+                    <button (click)="moveCartesian('x', 1)">▲</button>
+                    <button (click)="moveCartesian('x', -1)">▼</button>
+                </div>
+                <div class="axis-group">
+                    <span class="axis-label">Y</span>
+                    <button (click)="moveCartesian('y', 1)">▲</button>
+                    <button (click)="moveCartesian('y', -1)">▼</button>
+                </div>
+                <div class="axis-group">
+                    <span class="axis-label">Z</span>
+                    <button (click)="moveCartesian('z', 1)">▲</button>
+                    <button (click)="moveCartesian('z', -1)">▼</button>
+                </div>
+            </div>
+
+            <div class="rotation-controls">
+                <div class="rotation-group">
+                    <span class="axis-label">Yaw</span>
+                    <button (click)="moveRotation('qx', 1)">⟳</button>
+                    <button (click)="moveRotation('qx', -1)">⟲</button>
+                </div>
+                <div class="rotation-group">
+                    <span class="axis-label">Pitch</span>
+                    <button (click)="moveRotation('qy', 1)">⟳</button>
+                    <button (click)="moveRotation('qy', -1)">⟲</button>
+                </div>
+                <div class="rotation-group">
+                    <span class="axis-label">Roll</span>
+                    <button (click)="moveRotation('qz', 1)">⟳</button>
+                    <button (click)="moveRotation('qz', -1)">⟲</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Trayectorias -->
         <div class="trajectories-container">
@@ -82,13 +122,16 @@
 
             <div class="trajectory-controls">
                 <button class="add-point-btn" (click)="addPoint()">Agregar Punto</button>
-                <button class="save-trajectory-btn" (click)="addTrajectory()">Guardar Trayectoria</button>
+                <button class="update-trajectory-btn" (click)="updateTrajectory()">Guardar Trayectoria</button>
                 <button class="remove-trajectory-btn" (click)="removeTrajectory()">Eliminar Trayectoria</button>
+                <button class="save-trajectory-btn" (click)="addTrajectory()">Añadir Trayectoria</button>
+                <button class="execute-trajectory-btn" (click)="executeTrajectory()">Test trayectoria</button>
             </div>
 
             <ul class="points-list">
-                <li class="point-item" *ngFor="let point of newTrajectory.points; let idx = index">
-                    <span class="point-info" (click)="moveToPoint(point)">Posición {{ idx + 1 }} {{ point.positions }} - Tiempo: {{ point.time }}s</span>
+                <li class="point-item" *ngFor="let point of newTrajectory?.points; let idx = index">
+                    <span class="point-info" (click)="moveToPoint(point)">Posición {{ idx + 1 }} {{ point.angles }} - Tiempo: {{ point.time }}s</span>
+                    <button class="delete-point-btn" (click)="deletePoint(idx)">Eliminar</button>
                     <button class="update-point-btn" (click)="updatePoint(idx)">Actualizar</button>
                 </li>
             </ul>

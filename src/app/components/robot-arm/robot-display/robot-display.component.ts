@@ -1,14 +1,15 @@
-import { AfterViewInit, Component, effect, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, effect, ElementRef, signal, ViewChild } from '@angular/core';
 import { RosService } from '../../../services/ros.service';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { UiStateService } from '../../../services/ui-state.service';
 import { RobotStateService } from '../../../services/robot-state.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-robot-display',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './robot-display.component.html',
   styleUrl: './robot-display.component.scss'
 })
@@ -29,10 +30,11 @@ export class RobotDisplayComponent implements AfterViewInit {
   joint6!: THREE.Object3D;
 
   robotModel: any;
-
+  manualMode: boolean = false;
+  tcpPose: { x: number, y: number, z: number, qx: number, qy: number, qz: number, qw: number } | null = { x: 0, y: 0, z: 0, qx: 0, qy: 0, qz: 0, qw: 0 };
   controls!: OrbitControls;
 
-  constructor(private rosService: RosService, 
+  constructor(private rosService: RosService,
     private uiStateService: UiStateService,
     private robot: RobotStateService
   ) {
@@ -60,6 +62,8 @@ export class RobotDisplayComponent implements AfterViewInit {
     this.uiStateService.resetCamera$.subscribe(() => {
       this.resetCameraPosition();
     });
+
+    this.uiStateService.manualMode$.subscribe(mode => { this.manualMode = mode; });
 
     effect(() => {
       const anglesRad = [
@@ -90,7 +94,10 @@ export class RobotDisplayComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.initScene();
     this.animate();
-    this.rosService.subscribeToJointStates((message) => this.updateRobotMovement(message));
+    this.rosService.subscribeToJointStates((message) => {
+      if (!this.manualMode) return; // Ignorar actualizaciones en modo manual
+      this.updateRobotMovement(message)
+    });
   }
 
   initScene() {
@@ -165,20 +172,24 @@ export class RobotDisplayComponent implements AfterViewInit {
   }
 
   updateRobotMovement(message: any) {
-    const jointPositions = message.position;
+    const jointPositionsMap: { [key: string]: number } = {};
+    message.name.forEach((jointName: string, i: number) => {
+      jointPositionsMap[jointName] = message.position[i];
+    });
 
-    this.robot.angle1.set(Math.round(jointPositions[0] * 180 / Math.PI));
-    this.robot.angle2.set(Math.round(jointPositions[1] * 180 / Math.PI));
-    this.robot.angle3.set(Math.round(jointPositions[2] * 180 / Math.PI));
-    this.robot.angle4.set(Math.round(jointPositions[3] * 180 / Math.PI));
-    this.robot.angle5.set(Math.round(jointPositions[4] * 180 / Math.PI));
-    this.robot.angle6.set(Math.round(jointPositions[5] * 180 / Math.PI));
-    
+    this.robot.angle1.set(Math.round(jointPositionsMap['junta_0_1'] * 180 / Math.PI));
+    this.robot.angle2.set(Math.round(jointPositionsMap['junta_1_2'] * 180 / Math.PI));
+    this.robot.angle3.set(Math.round(jointPositionsMap['junta_2_3'] * 180 / Math.PI));
+    this.robot.angle4.set(Math.round(jointPositionsMap['junta_3_4'] * 180 / Math.PI));
+    this.robot.angle5.set(Math.round(jointPositionsMap['junta_4_5'] * 180 / Math.PI));
+    this.robot.angle6.set(Math.round(jointPositionsMap['junta_5_6'] * 180 / Math.PI));
+
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
     this.renderer.render(this.scene, this.camera);
+    this.tcpPose = this.getEndEffectorPose();
   }
 
   loadRobotModel() {
@@ -351,4 +362,56 @@ export class RobotDisplayComponent implements AfterViewInit {
     this.controls.target.set(0, 1.0, 0);
     this.controls.update();
   }
+
+  getEndEffectorPose() {
+    if (!this.robotModel) return null;
+
+    const endEffector = this.robotModel.links["ee_link"];
+    if (!endEffector) return null;
+
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+
+    // Obtener posición y orientación mundial
+    endEffector.getWorldPosition(position);
+    endEffector.getWorldQuaternion(quaternion);
+
+    // Ajuste de inclinación del modelo URDF (-π/2 en X)
+    const modelInclination = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+    quaternion.premultiply(modelInclination);
+
+    // Ajuste para coincidir con convención ROS (X->X, Y->Z, Z->-Y)
+    const rosPosition = new THREE.Vector3(
+      position.x / 3,       // X
+      -position.z / 3,       // Y
+      position.y / 3        // Z
+    );
+
+    const rosQuaternion = new THREE.Quaternion(
+      quaternion.x,   // X
+      quaternion.y,   // Y
+      quaternion.z,   // Z
+      quaternion.w    // W
+    );
+
+    // Guardar en el robot state (opcional, para UI)
+    this.robot.x.set(parseFloat(rosPosition.x.toFixed(3)));
+    this.robot.y.set(parseFloat(rosPosition.y.toFixed(3)));
+    this.robot.z.set(parseFloat(rosPosition.z.toFixed(3)));
+    this.robot.qx.set(rosQuaternion.x);
+    this.robot.qy.set(rosQuaternion.y);
+    this.robot.qz.set(rosQuaternion.z);
+    this.robot.qw.set(rosQuaternion.w);
+
+    return {
+      x: rosPosition.x,
+      y: rosPosition.y,
+      z: rosPosition.z,
+      qx: rosQuaternion.x,
+      qy: rosQuaternion.y,
+      qz: rosQuaternion.z,
+      qw: rosQuaternion.w
+    };
+  }
+
 }

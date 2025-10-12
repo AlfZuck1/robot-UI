@@ -11,4 +11,11 @@ export class RobotStateService {
   angle5 = signal(0);
   angle6 = signal(0);
   time = signal(0);
+  x = signal(0);
+  y = signal(0);
+  z = signal(0);
+  qx = signal(0);
+  qy = signal(0);
+  qz = signal(0);
+  qw = signal(0);
 }

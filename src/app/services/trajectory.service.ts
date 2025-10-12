@@ -7,8 +7,8 @@ import { Trajectory } from '../components/models/trajectory';
 export class TrajectoryService {
   private trajectories: Trajectory[] = [];
 
-  addTrajectory(Trajectory: Trajectory) {
-    this.trajectories.push(Trajectory);
+  addTrajectory(trajectory: Trajectory) {
+    this.trajectories.push(trajectory);
   }
 
   getTrajectories(): Trajectory[] {
