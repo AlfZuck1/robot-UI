@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import ROSLIB from 'roslib';
 import { environment } from '../../environments/environment.development';
-import { First_Pose, Trajectory, TrajectoryPoint } from '../components/models/trajectory';
+import { First_Pose, Pose, Trajectory, TrajectoryPoint } from '../components/models/trajectory';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, throwError } from 'rxjs';
 
@@ -123,11 +123,12 @@ export class RosService {
       });
   }
 
-  public planPath(firstPose: First_Pose, targetPose: any[]): Observable<any> {
+  public planTrajectory(firstPose: First_Pose, targetPose: any[], cartesian: boolean): Observable<any> {
     const payload = {
       password: this.API_PASSWORD,
       first_pose: firstPose,
-      poses: targetPose
+      poses: targetPose,
+      cartesian: cartesian
     };
     return this.http.post(`${this.API_URL}/plan_trajectory`, payload).pipe(
       catchError(err => {
@@ -136,61 +137,92 @@ export class RosService {
     );
   }
 
-  // --- CRUD Trajectory
-  createTrajectory(trajectory: Trajectory): Observable<any> {
+  public executeTrajectory(){
     const payload = {
       password: this.API_PASSWORD,
-      name: trajectory.name,
-      points: trajectory.points
-    };
-    return this.http.post(`${this.API_URL}/trajectories`, payload).pipe(
+    }
+    return this.http.post(`${this.API_URL}/execute_trajectory`, payload).pipe(
       catchError(err => {
-        console.error('Error creando trayectoria:', err);
-        return of(null);
+        return throwError(() => new Error('Error ejecutando trayectoria'));
       })
     );
   }
 
-  updateTrajectory(id: number, trajectory: Trajectory): Observable<any> {
-    const payload = {
-      password: this.API_PASSWORD,
-      name: trajectory.name,
-      points: trajectory.points
-    };
-    return this.http.put(`${this.API_URL}/trajectories/${id}`, payload).pipe(
-      catchError(err => {
-        console.error('Error actualizando trayectoria:', err);
-        return of(null);
-      })
-    );
-  }
+  public executePosition(targetPose: Pose[]): Observable < any > {
+  const payload = {
+    password: this.API_PASSWORD,
+    poses: targetPose
+  };
+  return this.http.post(`${this.API_URL}/send_positions`, payload).pipe(
+    catchError(err => {
+      return throwError(() => new Error("Error en la planificación o ejecución de la trayectoria"))
+    })
+  );
+}
 
-  getTrajectories(): Observable<Trajectory[]> {
-    return this.http.get<Trajectory[]>(this.API_URL + '/trajectories').pipe(
-      catchError((err) => {
-        console.error('Error leyendo trayectorias:', err);
-        return of([]);
-      })
-    );
-  }
+  public stopMotion(): Observable < any > {
+  return this.http.get(`${this.API_URL}/stop_motion`).pipe(
+    catchError(err => {
+      return throwError(() => new Error("Error al detener el movimiento"))
+    })
+  );
+}
 
-  getTrajectory(id: number): Observable<Trajectory> {
-    return this.http.get<Trajectory>(`${this.API_URL}/trajectories/${id}`).pipe(
-      catchError((err) => {
-        console.error('Error leyendo trayectoria:', err);
-        return of({ id: 0, name: 'Error', points: [] });
-      })
-    );
-  }
+// --- CRUD Trajectory
+createTrajectory(trajectory: Trajectory): Observable < any > {
+  const payload = {
+    password: this.API_PASSWORD,
+    name: trajectory.name,
+    points: trajectory.points
+  };
+  return this.http.post(`${this.API_URL}/trajectories`, payload).pipe(
+    catchError(err => {
+      console.error('Error creando trayectoria:', err);
+      return of(null);
+    })
+  );
+}
 
-  deleteTrajectory(index: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/trajectories/${index}`,
-      { body: { password: this.API_PASSWORD } }
-    ).pipe(
-      catchError(err => {
-        console.error('Error eliminando trayectoria:', err);
-        return of(null);
-      })
-    );
-  }
+updateTrajectory(id: number, trajectory: Trajectory): Observable < any > {
+  const payload = {
+    password: this.API_PASSWORD,
+    name: trajectory.name,
+    points: trajectory.points
+  };
+  return this.http.put(`${this.API_URL}/trajectories/${id}`, payload).pipe(
+    catchError(err => {
+      console.error('Error actualizando trayectoria:', err);
+      return of(null);
+    })
+  );
+}
+
+getTrajectories(): Observable < Trajectory[] > {
+  return this.http.get<Trajectory[]>(this.API_URL + '/trajectories').pipe(
+    catchError((err) => {
+      console.error('Error leyendo trayectorias:', err);
+      return of([]);
+    })
+  );
+}
+
+getTrajectory(id: number): Observable < Trajectory > {
+  return this.http.get<Trajectory>(`${this.API_URL}/trajectories/${id}`).pipe(
+    catchError((err) => {
+      console.error('Error leyendo trayectoria:', err);
+      return of({ id: 0, name: 'Error', points: [] });
+    })
+  );
+}
+
+deleteTrajectory(index: number): Observable < any > {
+  return this.http.delete(`${this.API_URL}/trajectories/${index}`,
+    { body: { password: this.API_PASSWORD } }
+  ).pipe(
+    catchError(err => {
+      console.error('Error eliminando trayectoria:', err);
+      return of(null);
+    })
+  );
+}
 }

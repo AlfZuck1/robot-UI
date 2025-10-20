@@ -17,3 +17,13 @@ export interface First_Pose {
   angle5: number;
   angle6: number;
 }
+
+export interface Pose{
+  x: number;
+  y: number;
+  z: number;
+  qx: number;
+  qy: number;
+  qz: number;
+  qw: number;
+}

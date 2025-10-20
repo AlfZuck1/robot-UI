@@ -19,3 +19,10 @@ export class RobotStateService {
   qz = signal(0);
   qw = signal(0);
 }
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RobotStateServiceSimulated extends RobotStateService {
+  // Es un servicio que simula el estado del robot
+}

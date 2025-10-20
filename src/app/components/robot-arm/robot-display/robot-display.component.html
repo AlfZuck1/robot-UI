@@ -1,21 +1,29 @@
-<div #canvasContainer class="viewer" [class.menu-open]="menuOpen"></div>
+<div #canvasContainer class="viewer" [class.menu-open]="menuOpen" style="position: relative;">
+  <button class="reset-camera-button" (click)="resetCameraPosition()" type="button">
+    📷
+  </button>
+  <button class="stop-motion-button" (click)="stopMotion()" type="button">
+    
+  </button>
+</div>
 
-<div class="pose-display" *ngIf="tcpPose">
+<div class="pose-display" *ngIf="robot">
   <div class="pose-section">
-    <p><strong>Posición:</strong></p>
+    <p><strong>Posición</strong></p>
+    <p style="text-align:center; font-weight: 600; font-size: 0.85rem; color:#aad1ff;">        Real   |  Simulada</p>
     <ul>
-      <li>X: {{ tcpPose.x.toFixed(2) }} m</li>
-      <li>Y: {{ tcpPose.y.toFixed(2) }} m</li>
-      <li>Z: {{ tcpPose.z.toFixed(2) }} m</li>
+      <li><span>X:</span> <span>{{ robot.x().toFixed(2) }} m</span> <span>{{ robotSimulated.x().toFixed(2) }}</span></li>
+      <li><span>Y:</span> <span>{{ robot.y().toFixed(2) }} m</span> <span>{{ robotSimulated.y().toFixed(2) }}</span></li>
+      <li><span>Z:</span> <span>{{ robot.z().toFixed(2) }} m</span> <span>{{ robotSimulated.z().toFixed(2) }}</span></li>
     </ul>
   </div>
   <div class="pose-section">
-    <p><strong>Orientación:</strong></p>
+    <p><strong>Orientación</strong></p>
     <ul>
-      <li>x: {{ tcpPose.qx.toFixed(2) }}</li>
-      <li>y: {{ tcpPose.qy.toFixed(2) }}</li>
-      <li>z: {{ tcpPose.qz.toFixed(2) }}</li>
-      <li>w: {{ tcpPose.qw.toFixed(2) }}</li>
+      <li><span>qx:</span> <span>{{ robot.qx().toFixed(2) }}</span> <span>{{ robotSimulated.qx().toFixed(2)}}</span></li>
+      <li><span>qy:</span> <span>{{ robot.qy().toFixed(2) }}</span> <span>{{ robotSimulated.qy().toFixed(2)}}</span></li>
+      <li><span>qz:</span> <span>{{ robot.qz().toFixed(2) }}</span> <span>{{ robotSimulated.qz().toFixed(2)}}</span></li>
+      <li><span>qw:</span> <span>{{ robot.qw().toFixed(2) }}</span> <span>{{ robotSimulated.qw().toFixed(2)}}</span></li>
     </ul>
   </div>
 </div>

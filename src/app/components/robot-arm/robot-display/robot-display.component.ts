@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import URDFLoader from 'urdf-loader';
 import { UiStateService } from '../../../services/ui-state.service';
-import { RobotStateService } from '../../../services/robot-state.service';
+import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -30,13 +30,16 @@ export class RobotDisplayComponent implements AfterViewInit {
   joint6!: THREE.Object3D;
 
   robotModel: any;
+  robotModelSimulated: any;
+  endEffectorAxisHelper!: THREE.AxesHelper;
+  endEffectorAxisHelperSimulated!: THREE.AxesHelper;
   manualMode: boolean = false;
-  tcpPose: { x: number, y: number, z: number, qx: number, qy: number, qz: number, qw: number } | null = { x: 0, y: 0, z: 0, qx: 0, qy: 0, qz: 0, qw: 0 };
   controls!: OrbitControls;
 
   constructor(private rosService: RosService,
     private uiStateService: UiStateService,
-    private robot: RobotStateService
+    public robot: RobotStateService,
+    public robotSimulated: RobotStateServiceSimulated
   ) {
     this.uiStateService.isSmallScreen$.subscribe(isSmall => {
       this.isSmallScreen = isSmall;
@@ -75,12 +78,31 @@ export class RobotDisplayComponent implements AfterViewInit {
         this.robot.angle6() * Math.PI / 180,
       ];
 
+      const anglesRadSimulated = [
+        this.robotSimulated.angle1() * Math.PI / 180,
+        this.robotSimulated.angle2() * Math.PI / 180,
+        this.robotSimulated.angle3() * Math.PI / 180,
+        this.robotSimulated.angle4() * Math.PI / 180,
+        this.robotSimulated.angle5() * Math.PI / 180,
+        this.robotSimulated.angle6() * Math.PI / 180,
+      ]
+
       if (this.robotModel) {
         const names = ['junta_0_1', 'junta_1_2', 'junta_2_3', 'junta_3_4', 'junta_4_5', 'junta_5_6'];
         for (let i = 0; i < names.length; i++) {
           const joint = this.robotModel.joints[names[i]];
           if (joint) {
             joint.setJointValue(anglesRad[i]);
+          }
+        }
+      }
+
+      if (this.robotModelSimulated) {
+        const namesSim = ['junta_0_1', 'junta_1_2', 'junta_2_3', 'junta_3_4', 'junta_4_5', 'junta_5_6'];
+        for (let i = 0; i < namesSim.length; i++) {
+          const jointSim = this.robotModelSimulated.joints[namesSim[i]];
+          if (jointSim) {
+            jointSim.setJointValue(anglesRadSimulated[i]);
           }
         }
       }
@@ -95,7 +117,6 @@ export class RobotDisplayComponent implements AfterViewInit {
     this.initScene();
     this.animate();
     this.rosService.subscribeToJointStates((message) => {
-      if (!this.manualMode) return; // Ignorar actualizaciones en modo manual
       this.updateRobotMovement(message)
     });
   }
@@ -188,8 +209,32 @@ export class RobotDisplayComponent implements AfterViewInit {
 
   animate() {
     requestAnimationFrame(() => this.animate());
+
+    if (this.robotModel && this.endEffectorAxisHelper) {
+      const endEffectorReal = this.robotModel.links["ee_link"];
+      if (endEffectorReal) {
+        const pos = new THREE.Vector3();
+        const quat = new THREE.Quaternion();
+        endEffectorReal.getWorldPosition(pos);
+        endEffectorReal.getWorldQuaternion(quat);
+        this.endEffectorAxisHelper.position.copy(pos);
+        this.endEffectorAxisHelper.quaternion.copy(quat);
+      }
+    }
+    if (this.robotModelSimulated && this.endEffectorAxisHelperSimulated) {
+      const endEffectorSim = this.robotModelSimulated.links["ee_link"];
+      if (endEffectorSim) {
+        const posSim = new THREE.Vector3();
+        const quatSim = new THREE.Quaternion();
+        endEffectorSim.getWorldPosition(posSim);
+        endEffectorSim.getWorldQuaternion(quatSim);
+        this.endEffectorAxisHelperSimulated.position.copy(posSim);
+        this.endEffectorAxisHelperSimulated.quaternion.copy(quatSim);
+      }
+    }
     this.renderer.render(this.scene, this.camera);
-    this.tcpPose = this.getEndEffectorPose();
+    this.getEndEffectorPose(this.robotModel, this.robot);
+    this.getEndEffectorPose(this.robotModelSimulated, this.robotSimulated);
   }
 
   loadRobotModel() {
@@ -197,14 +242,31 @@ export class RobotDisplayComponent implements AfterViewInit {
     const manager = new THREE.LoadingManager();
     const loader = new URDFLoader(manager);
     const param = this.rosService.getUrdf();
+
     param.get((value: string) => {
       if (!value) {
         console.error('No se pudo obtener el URDF desde el parámetro de ROS.');
         return;
       }
       try {
+        // Cargar modelo URDF para el robot real y simulado
         this.robotModel = loader.parse(value);
         this.robotModel.rotation.x = -Math.PI / 2;
+        this.robotModel.scale.set(3, 3, 3);
+        this.scene.add(this.robotModel);
+
+        this.robotModelSimulated = loader.parse(value);
+        this.robotModelSimulated.rotation.x = -Math.PI / 2;
+        this.robotModelSimulated.scale.set(3, 3, 3);
+        this.scene.add(this.robotModelSimulated);
+
+        // Ejes en el efector final
+        this.endEffectorAxisHelper = new THREE.AxesHelper(0.2);
+        this.scene.add(this.endEffectorAxisHelper);
+        this.endEffectorAxisHelperSimulated = new THREE.AxesHelper(0.2);
+        this.scene.add(this.endEffectorAxisHelperSimulated);
+
+        // Manejar sombras y materiales después de un pequeño retraso para que se realice el renderizado
         setTimeout(() => {
           // Mejor manejo de sombras para todos los meshes
           this.robotModel.traverse((child: THREE.Object3D) => {
@@ -213,10 +275,22 @@ export class RobotDisplayComponent implements AfterViewInit {
               (child as THREE.Mesh).receiveShadow = true;
             }
           });
+
+          this.robotModelSimulated.traverse((child: THREE.Object3D) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              mesh.receiveShadow = false;
+              mesh.castShadow = false;
+              mesh.material = new THREE.MeshBasicMaterial({
+                color: 0x0000ff,
+                opacity: 0.3,
+                transparent: true,
+                depthWrite: false,
+              });
+            }
+          });
         }, 200);
 
-        this.robotModel.scale.set(3, 3, 3);
-        this.scene.add(this.robotModel);
       } catch (e) {
         console.error('Error al cargar el modelo URDF:', e);
       }
@@ -363,11 +437,11 @@ export class RobotDisplayComponent implements AfterViewInit {
     this.controls.update();
   }
 
-  getEndEffectorPose() {
-    if (!this.robotModel) return null;
+  getEndEffectorPose(robotModel: any, robot: any) {
+    if (!robotModel) return;
 
-    const endEffector = this.robotModel.links["ee_link"];
-    if (!endEffector) return null;
+    const endEffector = robotModel.links["ee_link"];
+    if (!endEffector) return;
 
     const position = new THREE.Vector3();
     const quaternion = new THREE.Quaternion();
@@ -395,23 +469,26 @@ export class RobotDisplayComponent implements AfterViewInit {
     );
 
     // Guardar en el robot state (opcional, para UI)
-    this.robot.x.set(parseFloat(rosPosition.x.toFixed(3)));
-    this.robot.y.set(parseFloat(rosPosition.y.toFixed(3)));
-    this.robot.z.set(parseFloat(rosPosition.z.toFixed(3)));
-    this.robot.qx.set(rosQuaternion.x);
-    this.robot.qy.set(rosQuaternion.y);
-    this.robot.qz.set(rosQuaternion.z);
-    this.robot.qw.set(rosQuaternion.w);
+    robot.x.set(parseFloat(rosPosition.x.toFixed(3)));
+    robot.y.set(parseFloat(rosPosition.y.toFixed(3)));
+    robot.z.set(parseFloat(rosPosition.z.toFixed(3)));
+    robot.qx.set(rosQuaternion.x);
+    robot.qy.set(rosQuaternion.y);
+    robot.qz.set(rosQuaternion.z);
+    robot.qw.set(rosQuaternion.w);
+  }
 
-    return {
-      x: rosPosition.x,
-      y: rosPosition.y,
-      z: rosPosition.z,
-      qx: rosQuaternion.x,
-      qy: rosQuaternion.y,
-      qz: rosQuaternion.z,
-      qw: rosQuaternion.w
-    };
+  stopMotion(){
+    this.rosService.stopMotion().subscribe(
+      {
+        next: (data) => {
+          console.log("Movimiento detenido");
+        },
+        error: (error) => {
+          console.error("Detención del robot érronea");
+        }
+      }
+    );
   }
 
 }

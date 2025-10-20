@@ -8,116 +8,151 @@
         <button class="close-menu" (click)="toggleMenu()" aria-label="Cerrar menú" *ngIf="menuOpen">
             ✕
         </button>
-        <button class="manual-mode" (click)="toggleManual()" aria-label="Cambiar modo">
-            👁️
-        </button>
-        <div class="joint-controls">
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 1 ({{ pointAngles[0].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-175" max="175" [(ngModel)]="pointAngles[0]"
-                        (input)="moveJoint('junta_0_1', pointAngles[0])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 2 ({{ pointAngles[1].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-90" max="90" [(ngModel)]="pointAngles[1]"
-                        (input)="moveJoint('junta_1_2', pointAngles[1])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 3 ({{ pointAngles[2].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-110" max="110" [(ngModel)]="pointAngles[2]"
-                        (input)="moveJoint('junta_2_3', pointAngles[2])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 4 ({{ pointAngles[3].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[3]"
-                        (input)="moveJoint('junta_3_4', pointAngles[3])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 5 ({{ pointAngles[4].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-105" max="105" [(ngModel)]="pointAngles[4]"
-                        (input)="moveJoint('junta_4_5', pointAngles[4])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Ángulo 6 ({{ pointAngles[5].toFixed(2) }}°)
-                    <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[5]"
-                        (input)="moveJoint('junta_5_6', pointAngles[5])">
-                </label>
-            </div>
-            <div class="joint-control">
-                <label class="joint-label">
-                    Tiempo ({{ robot.time().toFixed(2) }}s)
-                    <input class="joint-slider" type="range" min="0" max="30" [(ngModel)]="robot.time">
-                </label>
-            </div>
-        </div>
-        <button class="reset-camera-button" (click)="resetCameraPosition()">Restablecer posición de la cámara</button>
-        <button class="send-command-button" (click)="rotate6Joint(robot.angle6())">Enviar esfuerzo al motor 6</button>
 
-         <!-- Teach Pendant -->
-        <div class="teach-pendant">
-            <h3 class="teach-title">Control Cartesiano (Teach Pendant)</h3>
+        <!-- Manual mode toggle con indicador visual -->
+        <button class="cartesian-mode" [class.active]="cartesianMode" (click)="toggleCartesianMode()"
+            aria-label="Cambiar modo">
+            {{ cartesianMode ? '🟢 Modo Cartesiano' : '🔴 Modo Libre' }}
+        </button>
+
+        <!-- Navegación de submenús -->
+        <nav class="submenu-nav">
+            <button (click)="activeSubmenu = 'controls'" [class.active]="activeSubmenu === 'controls'"
+                aria-label="Controles de articulaciones">
+                Controles
+            </button>
+            <button (click)="activeSubmenu = 'trajectories'" [class.active]="activeSubmenu === 'trajectories'"
+                aria-label="Control de trayectorias">
+                Trayectorias
+            </button>
+        </nav>
+
+        <!-- Submenú Controles -->
+        <section *ngIf="activeSubmenu === 'controls'" class="submenu articulations-submenu">
+            <div class="joint-controls">
+                <!-- Mantener el bloque existente intacto -->
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 1 ({{ pointAngles[0].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-175" max="175" [(ngModel)]="pointAngles[0]"
+                            (input)="moveSimulatedJoint('junta_0_1', pointAngles[0])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 2 ({{ pointAngles[1].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-90" max="90" [(ngModel)]="pointAngles[1]"
+                            (input)="moveSimulatedJoint('junta_1_2', pointAngles[1])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 3 ({{ pointAngles[2].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-110" max="110" [(ngModel)]="pointAngles[2]"
+                            (input)="moveSimulatedJoint('junta_2_3', pointAngles[2])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 4 ({{ pointAngles[3].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[3]"
+                            (input)="moveSimulatedJoint('junta_3_4', pointAngles[3])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 5 ({{ pointAngles[4].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-105" max="105" [(ngModel)]="pointAngles[4]"
+                            (input)="moveSimulatedJoint('junta_4_5', pointAngles[4])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Ángulo 6 ({{ pointAngles[5].toFixed(2) }}°)
+                        <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[5]"
+                            (input)="moveSimulatedJoint('junta_5_6', pointAngles[5])" />
+                    </label>
+                </div>
+                <div class="joint-control">
+                    <label class="joint-label">
+                        Tiempo ({{ robot.time().toFixed(2) }}s)
+                        <input class="joint-slider" type="range" min="0" max="30" [(ngModel)]="robot.time" />
+                    </label>
+                </div>
+            </div>
+            <div class="trajectory-buttons">
+                <button class="send-command-button" (click)="planTrajectory()" type="button">
+                    Planear Trayectoria
+                </button>
+                <button class="execute-button" (click)="executePlannedTrajectory()" type="button">
+                    Ejecutar Trayectoria
+                </button>
+            </div>
+            <h3>Control Cartesiano</h3>
             <div class="axis-controls">
                 <div class="axis-group">
                     <span class="axis-label">X</span>
-                    <button (click)="moveCartesian('x', 1)">▲</button>
-                    <button (click)="moveCartesian('x', -1)">▼</button>
+                    <div class="button-row">
+                        <button (click)="moveCartesian('x', -1)">▼</button>
+                        <button (click)="moveCartesian('x', 1)">▲</button>
+                    </div>
                 </div>
                 <div class="axis-group">
                     <span class="axis-label">Y</span>
-                    <button (click)="moveCartesian('y', 1)">▲</button>
-                    <button (click)="moveCartesian('y', -1)">▼</button>
+                    <div class="button-row">
+                        <button (click)="moveCartesian('y', -1)">▼</button>
+                        <button (click)="moveCartesian('y', 1)">▲</button>
+                    </div>
                 </div>
                 <div class="axis-group">
                     <span class="axis-label">Z</span>
-                    <button (click)="moveCartesian('z', 1)">▲</button>
-                    <button (click)="moveCartesian('z', -1)">▼</button>
+                    <div class="button-row">
+                        <button (click)="moveCartesian('z', -1)">▼</button>
+                        <button (click)="moveCartesian('z', 1)">▲</button>
+                    </div>
                 </div>
             </div>
 
             <div class="rotation-controls">
                 <div class="rotation-group">
                     <span class="axis-label">Yaw</span>
-                    <button (click)="moveRotation('qx', 1)">⟳</button>
-                    <button (click)="moveRotation('qx', -1)">⟲</button>
+                    <div class="button-row">
+                        <button (click)="moveRotation('qx', -1)">⟲</button>
+                        <button (click)="moveRotation('qx', 1)">⟳</button>
+                    </div>
                 </div>
                 <div class="rotation-group">
                     <span class="axis-label">Pitch</span>
-                    <button (click)="moveRotation('qy', 1)">⟳</button>
-                    <button (click)="moveRotation('qy', -1)">⟲</button>
+                    <div class="button-row">
+                        <button (click)="moveRotation('qy', -1)">⟲</button>
+                        <button (click)="moveRotation('qy', 1)">⟳</button>
+                    </div>
                 </div>
                 <div class="rotation-group">
                     <span class="axis-label">Roll</span>
-                    <button (click)="moveRotation('qz', 1)">⟳</button>
-                    <button (click)="moveRotation('qz', -1)">⟲</button>
+                    <div class="button-row">
+                        <button (click)="moveRotation('qz', -1)">⟲</button>
+                        <button (click)="moveRotation('qz', 1)">⟳</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Trayectorias -->
-        <div class="trajectories-container">
+        <!-- Submenú Trayectorias -->
+        <section *ngIf="activeSubmenu === 'trajectories'" class="submenu trajectories-submenu">
             <h2 class="trajectories-title">Trayectorias</h2>
 
             <div class="trajectory-selector">
-                <label class="trajectory-label">Seleccionar Trayectoria:</label>
-                <select class="trajectory-select" [(ngModel)]="newTrajectory" (change)="onTrajectoryChange()">
+                <label class="trajectory-label" for="trajectory-select">Seleccionar Trayectoria:</label>
+                <select id="trajectory-select" class="trajectory-select" [(ngModel)]="newTrajectory"
+                    (change)="onTrajectoryChange()">
                     <option *ngFor="let t of trajectories" [ngValue]="t">{{ t.name }}</option>
                 </select>
             </div>
 
             <div class="trajectory-name">
-                <input type="text" class="trajectory-name-input" [(ngModel)]="newTrajectory.name"
-                    placeholder="Nombre de la trayectoria" />
+                <input type="text" class="trajectory-name-input" placeholder="Nombre de la trayectoria"
+                    [(ngModel)]="newTrajectory.name" />
             </div>
 
             <div class="trajectory-controls">
@@ -125,18 +160,39 @@
                 <button class="update-trajectory-btn" (click)="updateTrajectory()">Guardar Trayectoria</button>
                 <button class="remove-trajectory-btn" (click)="removeTrajectory()">Eliminar Trayectoria</button>
                 <button class="save-trajectory-btn" (click)="addTrajectory()">Añadir Trayectoria</button>
-                <button class="execute-trajectory-btn" (click)="executeTrajectory()">Test trayectoria</button>
             </div>
 
-            <ul class="points-list">
-                <li class="point-item" *ngFor="let point of newTrajectory?.points; let idx = index">
-                    <span class="point-info" (click)="moveToPoint(point)">Posición {{ idx + 1 }} {{ point.angles }} - Tiempo: {{ point.time }}s</span>
-                    <button class="delete-point-btn" (click)="deletePoint(idx)">Eliminar</button>
-                    <button class="update-point-btn" (click)="updatePoint(idx)">Actualizar</button>
+            <div class="trajectory-controls">
+                <button class="save-trajectory-btn" (click)="planMultipleTrajectory()">Planear Trayectoria</button>
+                <button class="save-trajectory-btn" (click)="executePlannedTrajectory()">Ejecutar Trayectoria</button>
+            </div>
+
+            <ul class="points-list" cdkDropList (cdkDropListDropped)="dropPoint($event)">
+                <li class="point-item" *ngFor="let point of newTrajectory?.points; let idx = index" cdkDrag>
+                    <div class="drag-container">
+                        <span class="drag-handle" cdkDragHandle>
+                            <i class="fa-solid fa-grip-lines"></i>
+                        </span>
+
+                        <span class="point-info" (click)="moveToPoint(point)">
+                            Posición {{ idx + 1 }} {{ point.angles }} - Tiempo: {{ point.time.toFixed(1) }}s
+                        </span>
+                    </div>
+
+                    <ng-template cdkDragPreview>
+                        <div class="drag-preview">
+                            Posición {{ idx + 1 }} {{ point.angles }} - {{ point.time.toFixed(1) }}s
+                        </div>
+                    </ng-template>
+
+                    <ng-template cdkDragPlaceholder>
+                        <div class="drag-placeholder"></div>
+                    </ng-template>
                 </li>
             </ul>
 
             <div class="trajectory-error" *ngIf="errorMessage">{{ errorMessage }}</div>
-        </div>
+        </section>
+
     </div>
 </div>

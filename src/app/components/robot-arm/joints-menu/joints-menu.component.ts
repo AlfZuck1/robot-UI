@@ -5,25 +5,51 @@ import { RosService } from '../../../services/ros.service';
 import { Trajectory } from '../../models/trajectory';
 import { UiStateService } from '../../../services/ui-state.service';
 import { TrajectoryService } from '../../../services/trajectory.service';
-import { RobotStateService } from '../../../services/robot-state.service';
+import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 
 @Component({
   selector: 'app-joints-menu',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './joints-menu.component.html',
   styleUrl: './joints-menu.component.scss'
 })
 export class JointsMenuComponent implements OnInit {
 
+  menuOpen: boolean = true;
+  activeSubmenu: 'controls' | 'trajectories' = 'controls';
+  cartesianMode: boolean = false;
+  errorMessage: string = '';
+  isSmallScreen: boolean = false;
+
+  // Articulaciones
+  pointAngles: number[] = [0, 0, 0, 0, 0, 0];
+  private trajectoryTimeouts: any[] = [];
+
+  // Trayectorias
+  trajectories: Trajectory[] = [];
+  currentTrajectory: Trajectory | null = null;
+  newTrajectory: Trajectory = {
+    id: 0,
+    name: 'Trayectoria 1',
+    points: [],
+  };
+
+  // Pose actual para movimiento cartesiano
+  currentPose = { x: 0.0, y: 0.0, z: 0.0, qx: 0.0, qy: 0.0, qz: 0.0, qw: 0.0 };
+  currentSimulatedPose = { x: 0.0, y: 0.0, z: 0.0, qx: 0.0, qy: 0.0, qz: 0.0, qw: 0.0 };
+  newPoint: { positions: number[]; time: number } = { positions: [0, 0, 0, 0, 0, 0], time: 0 };
+
   constructor(private rosService: RosService,
     private uiStateService: UiStateService,
     private trajectoryService: TrajectoryService,
-    public robot: RobotStateService) {
+    public robot: RobotStateService,
+    public robotSimulated: RobotStateServiceSimulated) {
     this.uiStateService.menuOpen$.subscribe(open => this.menuOpen = open);
     this.uiStateService.isSmallScreen$.subscribe(small => this.isSmallScreen = small);
-    this.uiStateService.manualMode$.subscribe(mode => this.manualMode = mode);
     this.trajectories = this.trajectoryService.getTrajectories();
+
     effect(() => {
       const currentPose = {
         x: this.robot.x(),
@@ -35,7 +61,18 @@ export class JointsMenuComponent implements OnInit {
         qw: this.robot.qw()
       };
 
+      const currentSimulatedPose = {
+        x: this.robotSimulated.x(),
+        y: this.robotSimulated.y(),
+        z: this.robotSimulated.z(),
+        qx: this.robotSimulated.qx(),
+        qy: this.robotSimulated.qy(),
+        qz: this.robotSimulated.qz(),
+        qw: this.robotSimulated.qw()
+      };
+
       this.currentPose = { ...currentPose };
+      this.currentSimulatedPose = { ...currentSimulatedPose };
     });
   }
 
@@ -43,61 +80,41 @@ export class JointsMenuComponent implements OnInit {
     this.loadTrajectories();
   }
 
-  currentPose = { x: 0.0, y: 0.0, z: 0.0, qx: 0.0, qy: 0.0, qz: 0.0, qw: 0.0 };
-  menuOpen: boolean = false;
-  isSmallScreen: boolean = false;
-  errorMessage: string = '';
-  manualMode: boolean = false;
-
-  // local Angles
-  pointAngles: number[] = [0, 0, 0, 0, 0, 0];
-
-  trajectories: Trajectory[] = [];
-  currentTrajectory: Trajectory | null = null;
-  newTrajectory: Trajectory = {
-    id: 0,
-    name: 'Trayectoria 1',
-    points: []
-  };
-  newPoint: { positions: number[]; time: number } = { positions: [0, 0, 0, 0, 0, 0], time: 0 };
-
-  moveJoint(joint: string, angle: number) {
-    if (!this.manualMode) {
-      this.robot.angle1.set(this.pointAngles[0]);
-      this.robot.angle2.set(this.pointAngles[1]);
-      this.robot.angle3.set(this.pointAngles[2]);
-      this.robot.angle4.set(this.pointAngles[3]);
-      this.robot.angle5.set(this.pointAngles[4]);
-      this.robot.angle6.set(this.pointAngles[5]);
-    }
-    else {
-      const jointMap: { [key: string]: number } = {
-        'junta_0_1': this.pointAngles[0],
-        'junta_1_2': this.pointAngles[1],
-        'junta_2_3': this.pointAngles[2],
-        'junta_3_4': this.pointAngles[3],
-        'junta_4_5': this.pointAngles[4],
-        'junta_5_6': this.pointAngles[5]
-      };
-
-      (this as any)[jointMap[joint]] = angle;
-
-      const angles = [
-        this.pointAngles[0], this.pointAngles[1], this.pointAngles[2],
-        this.pointAngles[3], this.pointAngles[4], this.pointAngles[5]
-      ].map(deg => deg * Math.PI / 180);
-
-      this.rosService.publishJointState(Object.keys(jointMap), angles);
-    }
+  setActiveMenu(menu: 'controls' | 'trajectories') {
+    this.activeSubmenu = menu;
   }
 
+  toggleCartesianMode() {
+    this.cartesianMode = !this.cartesianMode;
+  }
+
+  formatAngles(angles: number[]): string {
+    if (!angles) return '';
+    return angles.map(a => a !== undefined ? a.toFixed(1) : '').join(', ');
+  }
+
+  moveSimulatedJoint(joint: string, angle: number) {
+    const jointMap: { [key: string]: number } = {
+      'junta_0_1': this.pointAngles[0],
+      'junta_1_2': this.pointAngles[1],
+      'junta_2_3': this.pointAngles[2],
+      'junta_3_4': this.pointAngles[3],
+      'junta_4_5': this.pointAngles[4],
+      'junta_5_6': this.pointAngles[5]
+    };
+
+    this.robotSimulated.angle1.set(this.pointAngles[0]);
+    this.robotSimulated.angle2.set(this.pointAngles[1]);
+    this.robotSimulated.angle3.set(this.pointAngles[2]);
+    this.robotSimulated.angle4.set(this.pointAngles[3]);
+    this.robotSimulated.angle5.set(this.pointAngles[4]);
+    this.robotSimulated.angle6.set(this.pointAngles[5]);
+  }
+
+  // TODO: Delete later testing
   rotate6Joint(angle: number) {
     const num = angle / 360;
     this.rosService.publishJoint6Command(num);
-  }
-
-  resetCameraPosition() {
-    this.uiStateService.triggerResetCamera();
   }
 
   // --- Funciones de trayectorias ---
@@ -114,9 +131,17 @@ export class JointsMenuComponent implements OnInit {
   }
 
   addPoint() {
-    const positions = [parseFloat(this.robot.angle1().toFixed(2)), parseFloat(this.robot.angle2().toFixed(2)), parseFloat(this.robot.angle3().toFixed(2)), parseFloat(this.robot.angle4().toFixed(2)), parseFloat(this.robot.angle5().toFixed(2)), parseFloat(this.robot.angle6().toFixed(2))];
-    this.newPoint = { positions, time: parseFloat(this.robot.time().toFixed(2)) };
+    const positions = [parseFloat(this.robotSimulated.angle1().toFixed(2)), parseFloat(this.robotSimulated.angle2().toFixed(2)), parseFloat(this.robotSimulated.angle3().toFixed(2)), parseFloat(this.robotSimulated.angle4().toFixed(2)), parseFloat(this.robotSimulated.angle5().toFixed(2)), parseFloat(this.robotSimulated.angle6().toFixed(2))];
+    this.newPoint = { positions, time: parseFloat(this.robotSimulated.time().toFixed(2)) };
     this.newTrajectory.points.push({ angles: [...this.newPoint.positions], time: this.newPoint.time });
+  }
+
+  dropPoint(event: CdkDragDrop<any[]>) {
+    moveItemInArray(
+      this.newTrajectory.points,
+      event.previousIndex,
+      event.currentIndex
+    );
   }
 
   deletePoint(index: number) {
@@ -187,14 +212,13 @@ export class JointsMenuComponent implements OnInit {
 
   moveToPoint(point: { angles: number[], time: number }) {
     this.pointAngles = [...point.angles]
-
-    this.robot.angle1.set(point.angles[0]);
-    this.robot.angle2.set(point.angles[1]);
-    this.robot.angle3.set(point.angles[2]);
-    this.robot.angle4.set(point.angles[3]);
-    this.robot.angle5.set(point.angles[4]);
-    this.robot.angle6.set(point.angles[5]);
-    this.robot.time.set(point.time);
+    this.robotSimulated.angle1.set(point.angles[0]);
+    this.robotSimulated.angle2.set(point.angles[1]);
+    this.robotSimulated.angle3.set(point.angles[2]);
+    this.robotSimulated.angle4.set(point.angles[3]);
+    this.robotSimulated.angle5.set(point.angles[4]);
+    this.robotSimulated.angle6.set(point.angles[5]);
+    this.robotSimulated.time.set(point.time);
   }
 
   toggleMenu() {
@@ -202,25 +226,31 @@ export class JointsMenuComponent implements OnInit {
     this.uiStateService.setMenuOpen(this.menuOpen);
   }
 
-  toggleManual() {
-    this.manualMode = !this.manualMode;
-    this.uiStateService.setManualMode(this.manualMode);
-  }
-
-  executeTrajectory() {
+  planMultipleTrajectory() {
     if (!this.newTrajectory || this.newTrajectory.points.length === 0) return;
-    const poses = this.newTrajectory.points.map(pt => {
-      return {
+
+    const first_pose = {
+      angle1: this.robot.angle1() * Math.PI / 180,
+      angle2: this.robot.angle2() * Math.PI / 180,
+      angle3: this.robot.angle3() * Math.PI / 180,
+      angle4: this.robot.angle4() * Math.PI / 180,
+      angle5: this.robot.angle5() * Math.PI / 180,
+      angle6: this.robot.angle6() * Math.PI / 180,
+    }
+
+    const poses = [first_pose];
+    poses.push(
+      ...this.newTrajectory.points.map(pt => ({
         angle1: pt.angles[0] * Math.PI / 180,
         angle2: pt.angles[1] * Math.PI / 180,
         angle3: pt.angles[2] * Math.PI / 180,
         angle4: pt.angles[3] * Math.PI / 180,
         angle5: pt.angles[4] * Math.PI / 180,
         angle6: pt.angles[5] * Math.PI / 180
-      };
-    });
+      }))
+    );
 
-    this.rosService.planPath(poses[0], poses).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
       next: (data: any) => {
         console.log('Planificación de trayectoria exitosa:', data);
         if (!data.trajectory || data.trajectory.length === 0) return;
@@ -250,81 +280,30 @@ export class JointsMenuComponent implements OnInit {
     });
   }
 
-  testPlanPathMultiple() {
-    const poses = [
-      { x: 0.3, y: 0.4, z: 0.8, qx: 0.0, qy: 0.0, qz: 0.0, qw: 1.0 },
-      { x: 0.29, y: 0.40, z: 0.8, qx: 0.0, qy: 0.0, qz: 0.0, qw: 1.0 },
-      { x: 0.23, y: 0.15, z: 0.76, qx: -0.77, qy: 0.0, qz: 0.0, qw: 0.63 },
-    ];
-
-    const first_pose = {
-      angle1: -115 * Math.PI / 180,
-      angle2: -30 * Math.PI / 180,
-      angle3: 45 * Math.PI / 180,
-      angle4: 180 * Math.PI / 180,
-      angle5: 74 * Math.PI / 180,
-      angle6: -65 * Math.PI / 180
-    }
-
-    this.rosService.planPath(first_pose, poses).subscribe({
-      next: (data: any) => {
-        console.log('Planificación de trayectoria exitosa:', data);
-
-        // Recorremos la trayectoria recibida
-        if (!data.trajectory || data.trajectory.length === 0) return;
-
-        // Concatenamos todos los puntos de todas las poses
-        const allPoints: any[] = [];
-        let totalTime = 0;
-
-        data.trajectory.forEach((poseEntry: any) => {
-          let prevTime = 0; // time_from_start relativo a la pose
-          poseEntry.points.forEach((pt: any) => {
-            const delay = (pt.time_from_start - prevTime) * 1000; // ms
-            totalTime += delay;
-            prevTime = pt.time_from_start;
-
-            const point = {
-              angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
-              time: pt.time_from_start
-            };
-
-            setTimeout(() => {
-              this.moveToPoint(point);
-            }, totalTime);
-          });
-        });
-      },
-      error: (err) => {
-        console.error('Error planificando trayectoria:', err);
-      }
-    });
-  }
-
   // Movimiento cartesiano incremental
   moveCartesian(axis: 'x' | 'y' | 'z', direction: number) {
     // console.log("Current Pose before move:", this.currentPose);
     // Asignamos la pose inicial de las articulaciones del robot (actuales)
     const first_pose = {
-      angle1: this.robot.angle1() * Math.PI / 180,
-      angle2: this.robot.angle2() * Math.PI / 180,
-      angle3: this.robot.angle3() * Math.PI / 180,
-      angle4: this.robot.angle4() * Math.PI / 180,
-      angle5: this.robot.angle5() * Math.PI / 180,
-      angle6: this.robot.angle6() * Math.PI / 180
+      angle1: this.robotSimulated.angle1() * Math.PI / 180,
+      angle2: this.robotSimulated.angle2() * Math.PI / 180,
+      angle3: this.robotSimulated.angle3() * Math.PI / 180,
+      angle4: this.robotSimulated.angle4() * Math.PI / 180,
+      angle5: this.robotSimulated.angle5() * Math.PI / 180,
+      angle6: this.robotSimulated.angle6() * Math.PI / 180
     };
     // Creamos la mini-trayectoria: primero la pose actual que servirá como fallback
-    const poses = [{ ...this.currentPose }];
+    const poses = [{ ...this.currentSimulatedPose }];
     // Aumentamos/disminuimos distancia en el eje correspondiente
-    this.currentPose = {
-      ...this.currentPose,
-      x: axis === 'x' ? this.currentPose.x + direction * 0.01 : this.currentPose.x,
-      y: axis === 'y' ? this.currentPose.y + direction * 0.01 : this.currentPose.y,
-      z: axis === 'z' ? this.currentPose.z + direction * 0.01 : this.currentPose.z,
+    this.currentSimulatedPose = {
+      ...this.currentSimulatedPose,
+      x: axis === 'x' ? this.currentSimulatedPose.x + direction * 0.01 : this.currentSimulatedPose.x,
+      y: axis === 'y' ? this.currentSimulatedPose.y + direction * 0.01 : this.currentSimulatedPose.y,
+      z: axis === 'z' ? this.currentSimulatedPose.z + direction * 0.01 : this.currentSimulatedPose.z,
     };
-    poses.push({ ...this.currentPose });
+    poses.push({ ...this.currentSimulatedPose });
 
-    this.rosService.planPath(first_pose, poses).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
       next: (data: any) => {
         if (!data.trajectory || data.trajectory.length === 0) return;
 
@@ -340,7 +319,7 @@ export class JointsMenuComponent implements OnInit {
       },
       error: (err) => {
         console.log("Reverting to previous pose due to error.", poses[0]);
-        this.currentPose = { ...poses[0] }; // revertir a la pose original en caso de error
+        this.currentSimulatedPose = { ...poses[0] }; // revertir a la pose original en caso de error
         console.error('Error planificando movimiento cartesiano:', err);
       }
     });
@@ -351,20 +330,20 @@ export class JointsMenuComponent implements OnInit {
     // console.log("Current Pose before rotation:", this.currentPose);
 
     // Asignamos la pose inicial de las articulaciones del robot (actuales)
-    const poses = [{ ...this.currentPose }];
+    const poses = [{ ...this.currentSimulatedPose }];
     const first_pose = {
-      angle1: this.robot.angle1() * Math.PI / 180,
-      angle2: this.robot.angle2() * Math.PI / 180,
-      angle3: this.robot.angle3() * Math.PI / 180,
-      angle4: this.robot.angle4() * Math.PI / 180,
-      angle5: this.robot.angle5() * Math.PI / 180,
-      angle6: this.robot.angle6() * Math.PI / 180
+      angle1: this.robotSimulated.angle1() * Math.PI / 180,
+      angle2: this.robotSimulated.angle2() * Math.PI / 180,
+      angle3: this.robotSimulated.angle3() * Math.PI / 180,
+      angle4: this.robotSimulated.angle4() * Math.PI / 180,
+      angle5: this.robotSimulated.angle5() * Math.PI / 180,
+      angle6: this.robotSimulated.angle6() * Math.PI / 180
     };
 
     // Ángulo incremental a rotar (por ejemplo, 5 grados convertido a radianes)
     const angleIncrementRad = direction * 5 * Math.PI / 180;
     // Normalizar el quaternion actual
-    let q = [this.currentPose.qx, this.currentPose.qy, this.currentPose.qz, this.currentPose.qw] as [number, number, number, number];
+    let q = [this.currentSimulatedPose.qx, this.currentSimulatedPose.qy, this.currentSimulatedPose.qz, this.currentSimulatedPose.qw] as [number, number, number, number];
 
     // Definir el eje de rotación
     let axisVec: [number, number, number];
@@ -382,17 +361,17 @@ export class JointsMenuComponent implements OnInit {
     const qNew = quatMultiply(qIncrement, q);
 
     // Actualizar la pose
-    this.currentPose = {
-      ...this.currentPose,
+    this.currentSimulatedPose = {
+      ...this.currentSimulatedPose,
       qx: qNew[0],
       qy: qNew[1],
       qz: qNew[2],
       qw: qNew[3],
     };
 
-    poses.push({ ...this.currentPose });
+    poses.push({ ...this.currentSimulatedPose });
 
-    this.rosService.planPath(first_pose, poses).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
       next: (data: any) => {
         if (!data.trajectory || data.trajectory.length === 0) return;
 
@@ -408,8 +387,85 @@ export class JointsMenuComponent implements OnInit {
         console.log('Rotación incremental exitosa:', point);
       },
       error: (err) => {
-        this.currentPose = { ...poses[0] }; // revertir a la pose original en caso de error
+        this.currentSimulatedPose = { ...poses[0] }; // revertir a la pose original en caso de error
         console.error('Error planificando rotación:', err);
+      }
+    });
+  }
+
+  private clearTrajectoryTimeouts() {
+    this.trajectoryTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    this.trajectoryTimeouts = [];
+  }
+
+  planTrajectory() {
+    // Cancelar cualquier animación anterior antes de iniciar una nueva
+    this.clearTrajectoryTimeouts();
+
+    const first_pose = {
+      angle1: this.robot.angle1() * Math.PI / 180,
+      angle2: this.robot.angle2() * Math.PI / 180,
+      angle3: this.robot.angle3() * Math.PI / 180,
+      angle4: this.robot.angle4() * Math.PI / 180,
+      angle5: this.robot.angle5() * Math.PI / 180,
+      angle6: this.robot.angle6() * Math.PI / 180,
+    }
+
+    const targetPose = {
+      angle1: this.robotSimulated.angle1() * Math.PI / 180,
+      angle2: this.robotSimulated.angle2() * Math.PI / 180,
+      angle3: this.robotSimulated.angle3() * Math.PI / 180,
+      angle4: this.robotSimulated.angle4() * Math.PI / 180,
+      angle5: this.robotSimulated.angle5() * Math.PI / 180,
+      angle6: this.robotSimulated.angle6() * Math.PI / 180,
+    }
+
+    console.log(targetPose);
+
+    const poses = [
+      first_pose,
+      targetPose
+    ]
+
+    this.rosService.planTrajectory(first_pose, poses, this.cartesianMode).subscribe({
+      next: (data: any) => {
+        console.log('Planificación de trayectoria exitosa:', data);
+        if (!data.trajectory || data.trajectory.length === 0) return;
+
+        const allPoints: any[] = [];
+        let totalTime = 0;
+        data.trajectory.forEach((poseEntry: any) => {
+          let prevTime = 0;
+          poseEntry.points.forEach((pt: any) => {
+            const delay = (pt.time_from_start - prevTime) * 1000;
+            totalTime += delay;
+            prevTime = pt.time_from_start;
+            const point = {
+              angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
+              time: pt.time_from_start
+            };
+            const timeoutId = setTimeout(() => {
+              this.moveToPoint(point);
+            }, totalTime);
+            this.trajectoryTimeouts.push(timeoutId);
+            allPoints.push(point);
+          });
+        });
+      },
+      error: (err) => {
+        console.error('Error planificando trayectoria:', err);
+      }
+    });
+  }
+
+
+  executePlannedTrajectory() {
+    this.rosService.executeTrajectory().subscribe({
+      next: (res) => {
+        console.log('Ejecución de trayectoria iniciada:', res);
+      },
+      error: (err) => {
+        console.error('Error ejecutando trayectoria:', err);
       }
     });
   }
