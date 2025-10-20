@@ -227,58 +227,63 @@ export class JointsMenuComponent implements OnInit {
   }
 
   planMultipleTrajectory() {
-    if (!this.newTrajectory || this.newTrajectory.points.length === 0) return;
+  if (!this.newTrajectory || this.newTrajectory.points.length === 0) return;
 
-    const first_pose = {
-      angle1: this.robot.angle1() * Math.PI / 180,
-      angle2: this.robot.angle2() * Math.PI / 180,
-      angle3: this.robot.angle3() * Math.PI / 180,
-      angle4: this.robot.angle4() * Math.PI / 180,
-      angle5: this.robot.angle5() * Math.PI / 180,
-      angle6: this.robot.angle6() * Math.PI / 180,
-    }
+  // 🔹 Cancelar cualquier animación anterior antes de iniciar una nueva
+  this.clearTrajectoryTimeouts();
 
-    const poses = [first_pose];
-    poses.push(
-      ...this.newTrajectory.points.map(pt => ({
-        angle1: pt.angles[0] * Math.PI / 180,
-        angle2: pt.angles[1] * Math.PI / 180,
-        angle3: pt.angles[2] * Math.PI / 180,
-        angle4: pt.angles[3] * Math.PI / 180,
-        angle5: pt.angles[4] * Math.PI / 180,
-        angle6: pt.angles[5] * Math.PI / 180
-      }))
-    );
-
-    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
-      next: (data: any) => {
-        console.log('Planificación de trayectoria exitosa:', data);
-        if (!data.trajectory || data.trajectory.length === 0) return;
-        const allPoints: any[] = [];
-        let totalTime = 0;
-        data.trajectory.forEach((poseEntry: any) => {
-          let prevTime = 0;
-          poseEntry.points.forEach((pt: any) => {
-            const delay = (pt.time_from_start - prevTime) * 1000;
-            totalTime += delay;
-            prevTime = pt.time_from_start;
-            const point = {
-              angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
-              time: pt.time_from_start
-            };
-            setTimeout(() => {
-              this.moveToPoint(point);
-            }, totalTime);
-            allPoints.push(point);
-          });
-        }
-        );
-      },
-      error: (err) => {
-        console.error('Error planificando trayectoria:', err);
-      }
-    });
+  const first_pose = {
+    angle1: this.robot.angle1() * Math.PI / 180,
+    angle2: this.robot.angle2() * Math.PI / 180,
+    angle3: this.robot.angle3() * Math.PI / 180,
+    angle4: this.robot.angle4() * Math.PI / 180,
+    angle5: this.robot.angle5() * Math.PI / 180,
+    angle6: this.robot.angle6() * Math.PI / 180,
   }
+
+  const poses = [first_pose];
+  poses.push(
+    ...this.newTrajectory.points.map(pt => ({
+      angle1: pt.angles[0] * Math.PI / 180,
+      angle2: pt.angles[1] * Math.PI / 180,
+      angle3: pt.angles[2] * Math.PI / 180,
+      angle4: pt.angles[3] * Math.PI / 180,
+      angle5: pt.angles[4] * Math.PI / 180,
+      angle6: pt.angles[5] * Math.PI / 180
+    }))
+  );
+
+  this.rosService.planTrajectory(first_pose, poses, false).subscribe({
+    next: (data: any) => {
+      console.log('Planificación de trayectoria múltiple exitosa:', data);
+      if (!data.trajectory || data.trajectory.length === 0) return;
+
+      const allPoints: any[] = [];
+      let totalTime = 0;
+      data.trajectory.forEach((poseEntry: any) => {
+        let prevTime = 0;
+        poseEntry.points.forEach((pt: any) => {
+          const delay = (pt.time_from_start - prevTime) * 1000;
+          totalTime += delay;
+          prevTime = pt.time_from_start;
+          const point = {
+            angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
+            time: pt.time_from_start
+          };
+          // 🔹 Guardamos el timeout para poder cancelarlo después si es necesario
+          const timeoutId = setTimeout(() => {
+            this.moveToPoint(point);
+          }, totalTime);
+          this.trajectoryTimeouts.push(timeoutId);
+          allPoints.push(point);
+        });
+      });
+    },
+    error: (err) => {
+      console.error('Error planificando trayectoria múltiple:', err);
+    }
+  });
+}
 
   // Movimiento cartesiano incremental
   moveCartesian(axis: 'x' | 'y' | 'z', direction: number) {

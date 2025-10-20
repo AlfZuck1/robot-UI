@@ -84,6 +84,9 @@
                 <button class="send-command-button" (click)="planTrajectory()" type="button">
                     Planear Trayectoria
                 </button>
+                <button class="add-point-button" (click)="addPoint()" type="button">
+                    Añadir Posición
+                </button>
                 <button class="execute-button" (click)="executePlannedTrajectory()" type="button">
                     Ejecutar Trayectoria
                 </button>
@@ -163,28 +166,38 @@
             </div>
 
             <div class="trajectory-controls">
-                <button class="save-trajectory-btn" (click)="planMultipleTrajectory()">Planear Trayectoria</button>
-                <button class="save-trajectory-btn" (click)="executePlannedTrajectory()">Ejecutar Trayectoria</button>
+                <button class="plan-trajectory-btn" (click)="planMultipleTrajectory()">Planear Trayectoria</button>
+                <button class="execute-trajectory-btn" (click)="executePlannedTrajectory()">Ejecutar Trayectoria</button>
             </div>
 
             <ul class="points-list" cdkDropList (cdkDropListDropped)="dropPoint($event)">
                 <li class="point-item" *ngFor="let point of newTrajectory?.points; let idx = index" cdkDrag>
                     <div class="drag-container">
-                        <span class="drag-handle" cdkDragHandle>
-                            <i class="fa-solid fa-grip-lines"></i>
+                        <span class="point-info" (click)="moveToPoint(point)">
+                            Posición {{ idx + 1 }} {{ point.angles }} - Tiempo:
+                            {{ point.time.toFixed(1) }}s
                         </span>
 
-                        <span class="point-info" (click)="moveToPoint(point)">
-                            Posición {{ idx + 1 }} {{ point.angles }} - Tiempo: {{ point.time.toFixed(1) }}s
-                        </span>
+                        <button class="delete-btn" (click)="deletePoint(idx)">
+                            🗑️
+                        </button>
                     </div>
 
+                    <!-- Preview visible durante el drag -->
                     <ng-template cdkDragPreview>
                         <div class="drag-preview">
-                            Posición {{ idx + 1 }} {{ point.angles }} - {{ point.time.toFixed(1) }}s
+                            <span class="point-info">
+                                Posición {{ idx + 1 }} {{ point.angles }} - Tiempo:
+                                {{ point.time.toFixed(1) }}s
+                            </span>
+
+                            <button class="delete-btn preview-btn">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     </ng-template>
 
+                    <!-- Placeholder visual del destino -->
                     <ng-template cdkDragPlaceholder>
                         <div class="drag-placeholder"></div>
                     </ng-template>

@@ -242,8 +242,18 @@
   background-color: #3478f6;
 }
 
-.trajectory-buttons button.execute-button {
-  background-color: #28a745;
+.trajectory-buttons {
+  button.execute-button {
+    background-color: #1ba33b;
+  }
+
+  button.add-point-button {
+    background-color: #186d8f;
+  }
+
+  button.send-command-button {
+    background-color: #e74e4e;
+  }
 }
 
 .trajectory-buttons button:hover {
@@ -371,41 +381,37 @@
     border: none;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: filter 0.3s ease;
     color: #fff;
 
     &.add-point-btn {
       background-color: #3478f6;
-
-      &:hover {
-        background-color: #285ac1;
-      }
     }
 
     &.save-trajectory-btn {
       background-color: #28a745;
-
-      &:hover {
-        background-color: #218838;
-      }
     }
 
     &.remove-trajectory-btn {
       background-color: #dc3545;
-
-      &:hover {
-        background-color: #c82333;
-      }
     }
 
     &.update-trajectory-btn {
-      background-color: #ffc107;
-      color: #212529;
-
-      &:hover {
-        background-color: #e0a800;
-      }
+      background-color: #e7b41b;
     }
+
+    &.plan-trajectory-btn {
+      background-color: rgb(129, 36, 216);
+    }
+
+    &.execute-trajectory-btn {
+      background-color: #186d8f;
+    }
+
+    &:hover {
+      filter: brightness(0.8);
+    }
+
   }
 
   .points-list {
@@ -415,151 +421,160 @@
   }
 
   .point-item {
+    user-select: none;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background-color: #275fa8;
+    cursor: grab;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+
+  .point-item:active {
+    cursor: grabbing;
+  }
+
+  .point-item:hover {
+    background-color: #326dc1;
+    transform: translateY(-1px);
+  }
+
+  .drag-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    padding: 6px 10px;
+    padding: 8px 12px;
+    color: #fff;
+    gap: 10px;
+  }
+
+  .drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
-    background-color: #275fa8;
-    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+
+  .drag-handle:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .drag-handle i {
+    font-size: 1rem;
+    color: #fff;
+  }
+
+  .point-info {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Botón eliminar */
+  .delete-btn {
+    font-size: 1.5rem;
+    background: transparent;
+    border: none;
+    color: #ffbaba;
     cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .delete-btn:hover {
+    color: #f13333;
+    transform: scale(1.1);
+  }
+
+  /* --- DRAG EFFECTS --- */
+
+  /* Elemento que se está arrastrando */
+  .point-item.cdk-drag-preview,
+  .drag-preview {
+    background: #3f83d1;
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    opacity: 0.95;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  /* Placeholder (espacio donde se soltará) */
+  .drag-placeholder {
+    background: rgba(255, 255, 255, 0.12);
+    border: 3px dashed #66aaff;
+    min-height: 48px;
+    border-radius: 10px;
+    margin: 6px 0;
+    animation: pulse 1s infinite alternate;
+  }
+
+  /* Señal visual cuando hay un drag activo */
+  .points-list.cdk-drop-list-dragging .point-item:not(.cdk-drag-placeholder) {
+    filter: blur(0.5px) brightness(0.8);
+    transition: filter 0.2s;
+  }
+
+  /* Animación visual del área de destino */
+  @keyframes pulse {
+    from {
+      border-color: #66aaff;
+      opacity: 0.7;
+    }
+
+    to {
+      border-color: #99ccff;
+      opacity: 1;
+    }
+  }
+
+  /* Botón eliminar dentro del preview */
+  .preview-btn {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .simulate-point-btn,
+  .update-point-btn {
+    margin-left: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
     transition: background 0.3s ease;
 
-    &:hover {
-      background-color: #1e4a85;
-    }
+    &.simulate-point-btn {
+      background-color: #17a2b8;
 
-    .point-info {
-      flex: 1;
-    }
-
-    .points-list {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 0;
-    }
-
-    .point-item {
-      user-select: none;
-      margin-bottom: 8px;
-      border-radius: 8px;
-      background-color: #275fa8;
-      cursor: grab;
-      transition: all 0.25s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-    }
-
-    .point-item:active {
-      cursor: grabbing;
-    }
-
-    .point-item:hover {
-      background-color: #326dc1;
-      transform: translateY(-1px);
-    }
-
-    .drag-container {
-      display: flex;
-      align-items: center;
-      padding: 8px 12px;
-      color: #fff;
-      gap: 10px;
-    }
-
-    .drag-handle {
-      cursor: grab;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.15);
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-
-    .drag-handle:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .drag-handle i {
-      font-size: 1rem;
-      color: #fff;
-    }
-
-    .point-info {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .point-item.cdk-drag-preview {
-      background: #3f83d1;
-      color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05);
-      opacity: 0.95;
-    }
-
-    .drag-preview {
-      padding: 10px 14px;
-      background: #3b82f6;
-      border-radius: 8px;
-      color: #fff;
-      box-shadow: 0 4px 18px rgba(51, 140, 255, 0.4);
-      font-weight: 500;
-    }
-
-    .drag-placeholder {
-      background: rgba(255, 255, 255, 0.15);
-      border: 2px dashed #66aaff;
-      min-height: 42px;
-      border-radius: 8px;
-      margin: 4px 0;
-    }
-
-    .points-list.cdk-drop-list-dragging .point-item:not(.cdk-drag-placeholder) {
-      filter: blur(0.5px) brightness(0.9);
-      transition: filter 0.2s;
-    }
-
-    .simulate-point-btn,
-    .update-point-btn {
-      margin-left: 6px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: background 0.3s ease;
-
-      &.simulate-point-btn {
-        background-color: #17a2b8;
-
-        &:hover {
-          background-color: #138496;
-        }
+      &:hover {
+        background-color: #138496;
       }
+    }
 
-      &.update-point-btn {
-        background-color: #ffc107;
-        color: #212529;
+    &.update-point-btn {
+      background-color: #ffc107;
+      color: #212529;
 
-        &:hover {
-          background-color: #e0a800;
-        }
+      &:hover {
+        background-color: #e0a800;
       }
     }
   }
+}
 
-  .trajectory-error {
-    color: #ff6b6b;
-    margin-top: 8px;
-    font-size: 0.85rem;
-  }
+.trajectory-error {
+  color: #ff6b6b;
+  margin-top: 8px;
+  font-size: 0.85rem;
 }
 
 /* --- Responsive --- */
