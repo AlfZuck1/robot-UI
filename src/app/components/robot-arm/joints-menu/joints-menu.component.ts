@@ -474,6 +474,17 @@ export class JointsMenuComponent implements OnInit {
       }
     });
   }
+
+  executeCommand(cmd: string) {
+    this.rosService.executeCommand(cmd).subscribe({
+      next: (res) => {
+        console.log(`Comando ${cmd} ejecutado con éxito:`, res);
+      },
+      error: (err) => {
+        console.error(`Error ejecutando comando ${cmd}:`, err);
+      }
+    });
+  }
 }
 
 // Crear un cuaternión a partir de un eje y un ángulo en radianes
