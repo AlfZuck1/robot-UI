@@ -172,14 +172,6 @@ export class RosService {
     );
   }
 
-  public stopMotion(): Observable<any> {
-    return this.http.get(`${this.API_URL}/stop_motion`).pipe(
-      catchError(err => {
-        return throwError(() => new Error("Error al detener el movimiento"))
-      })
-    );
-  }
-
   // --- CRUD Trajectory
   createTrajectory(trajectory: Trajectory): Observable<any> {
     const payload = {

@@ -479,7 +479,7 @@ export class RobotDisplayComponent implements AfterViewInit {
   }
 
   stopMotion(){
-    this.rosService.stopMotion().subscribe(
+    this.rosService.executeCommand('stop').subscribe(
       {
         next: (data) => {
           console.log("Movimiento detenido");
