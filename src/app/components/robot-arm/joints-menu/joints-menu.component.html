@@ -1,4 +1,5 @@
 <div class="controls-container">
+    <app-login-dialog *ngIf="!authService.isLoggedIn()"></app-login-dialog>
     <button class="menu-toggle" (click)="toggleMenu()" aria-label="Abrir menú" *ngIf="!menuOpen && isSmallScreen">
         ☰ Controles
     </button>
@@ -24,6 +25,10 @@
             <button (click)="activeSubmenu = 'trajectories'" [class.active]="activeSubmenu === 'trajectories'"
                 aria-label="Control de trayectorias">
                 Trayectorias
+            </button>
+            <button (click)="activeSubmenu = 'calibration'" [class.active]="activeSubmenu === 'calibration'"
+                aria-label="Calibración">
+                Calibración
             </button>
         </nav>
 
@@ -164,17 +169,18 @@
             <div class="trajectory-controls">
                 <button class="add-point-btn" (click)="addPoint()">Agregar Punto</button>
                 <button class="update-trajectory-btn" (click)="updateTrajectory()">Guardar Trayectoria</button>
-                <button class="remove-trajectory-btn" (click)="removeTrajectory()">Eliminar Trayectoria</button>
+                <button class="remove-trajectory-btn" (click)="requestRemoveTrajectory()">Eliminar Trayectoria</button>
                 <button class="save-trajectory-btn" (click)="addTrajectory()">Añadir Trayectoria</button>
             </div>
 
             <div class="trajectory-controls">
                 <button class="plan-trajectory-btn" (click)="planMultipleTrajectory()">Planear Trayectoria</button>
-                <button class="execute-trajectory-btn" (click)="executePlannedTrajectory()">Ejecutar Trayectoria</button>
+                <button class="execute-trajectory-btn" (click)="executePlannedTrajectory()">Ejecutar
+                    Trayectoria</button>
             </div>
 
             <ul class="points-list" cdkDropList (cdkDropListDropped)="dropPoint($event)">
-                <li class="point-item" *ngFor="let point of newTrajectory?.points; let idx = index" cdkDrag>
+                <li class="point-item" *ngFor="let point of newTrajectory.points; let idx = index" cdkDrag>
                     <div class="drag-container">
                         <span class="point-info" (click)="moveToPoint(point)">
                             Posición {{ idx + 1 }} {{ point.angles }} - Tiempo:
@@ -210,5 +216,64 @@
             <div class="trajectory-error" *ngIf="errorMessage">{{ errorMessage }}</div>
         </section>
 
+        <!-- Submenú Calibración -->
+        <section *ngIf="activeSubmenu === 'calibration'" class="submenu calibration-submenu">
+            <h2 class="calibration-title">Calibración</h2>
+
+            <!-- Comandos generales -->
+            <div class="calibration-actions">
+                <button class="calib-btn" (click)="executeCommand('reset')">
+                    🔄 Reset
+                </button>
+
+                <button class="calib-btn" (click)="executeCommand('home')">
+                    🏠 Home
+                </button>
+
+                <button class="calib-btn danger" (click)="executeCommand('stop')">
+                    ⛔ STOP
+                </button>
+            </div>
+
+            <hr />
+
+            <!-- Calibración por articulación -->
+            <h3>Calibrar articulación</h3>
+
+            <div class="calibration-form">
+                <label>
+                    Articulación:
+                    <select [(ngModel)]="calibJoint">
+                        <option *ngFor="let j of [0,1,2,3,4,5]" [value]="j">
+                            Joint {{ j }}
+                        </option>
+                    </select>
+                </label>
+
+                <label>
+                    Liberar freno:
+                    <select [(ngModel)]="calibBrake">
+                        <option [value]="1">Sí</option>
+                        <option [value]="0">No</option>
+                    </select>
+                </label>
+
+                <label>
+                    Posición objetivo (ticks):
+                    <input type="number" [(ngModel)]="calibPosition" />
+                </label>
+
+                <button class="calib-btn primary" (click)="sendCalibrate()">
+                    🛠️ Calibrar
+                </button>
+            </div>
+
+            <div class="calibration-error" *ngIf="errorMessage">
+                {{ errorMessage }}
+            </div>
+        </section>
     </div>
 </div>
+
+<app-confirm-dialog-component></app-confirm-dialog-component>
+<router-outlet></router-outlet>

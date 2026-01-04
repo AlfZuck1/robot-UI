@@ -1,0 +1,11 @@
+<div class="backdrop" *ngIf="confirm.visible()">
+    <div class="dialog">
+        <h3>{{ confirm.title() }}</h3>
+        <p>{{ confirm.message() }}</p>
+
+        <div class="actions">
+            <button (click)="confirm.cancel()">Cancelar</button>
+            <button class="danger" (click)="confirm.accept()">Confirmar</button>
+        </div>
+    </div>
+</div>

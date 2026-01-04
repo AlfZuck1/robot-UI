@@ -7,18 +7,23 @@ import { UiStateService } from '../../../services/ui-state.service';
 import { TrajectoryService } from '../../../services/trajectory.service';
 import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { LoginDialogComponent } from "../../login-dialog/login-dialog.component";
+import { AuthService } from '../../../services/auth.service';
+import { ConfirmDialogComponent } from '../../confirm-dialog-component/confirm-dialog.component';
+import { RouterOutlet } from '@angular/router';
+import { ConfirmService } from '../../../services/confirm.service';
 
 
 @Component({
   selector: 'app-joints-menu',
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, LoginDialogComponent, ConfirmDialogComponent, RouterOutlet],
   templateUrl: './joints-menu.component.html',
   styleUrl: './joints-menu.component.scss'
 })
 export class JointsMenuComponent implements OnInit {
 
   menuOpen: boolean = true;
-  activeSubmenu: 'controls' | 'trajectories' = 'controls';
+  activeSubmenu: 'controls' | 'trajectories' | 'calibration' = 'controls';
   cartesianMode: boolean = false;
   errorMessage: string = '';
   isSmallScreen: boolean = false;
@@ -36,6 +41,11 @@ export class JointsMenuComponent implements OnInit {
     points: [],
   };
 
+  // Calibración
+  calibJoint: number = 0;
+  calibBrake: number = 1;
+  calibPosition: number = 0;
+
   // Pose actual para movimiento cartesiano
   currentPose = { x: 0.0, y: 0.0, z: 0.0, qx: 0.0, qy: 0.0, qz: 0.0, qw: 0.0 };
   currentSimulatedPose = { x: 0.0, y: 0.0, z: 0.0, qx: 0.0, qy: 0.0, qz: 0.0, qw: 0.0 };
@@ -44,6 +54,8 @@ export class JointsMenuComponent implements OnInit {
   constructor(private rosService: RosService,
     private uiStateService: UiStateService,
     private trajectoryService: TrajectoryService,
+    public authService: AuthService,
+    public confirmService: ConfirmService,
     public robot: RobotStateService,
     public robotSimulated: RobotStateServiceSimulated) {
     this.uiStateService.menuOpen$.subscribe(open => this.menuOpen = open);
@@ -80,7 +92,7 @@ export class JointsMenuComponent implements OnInit {
     this.loadTrajectories();
   }
 
-  setActiveMenu(menu: 'controls' | 'trajectories') {
+  setActiveMenu(menu: 'controls' | 'trajectories' | 'calibration') {
     this.activeSubmenu = menu;
   }
 
@@ -179,6 +191,18 @@ export class JointsMenuComponent implements OnInit {
     });
   }
 
+  async requestRemoveTrajectory() {
+    try {
+      await this.confirmService.confirm({
+        title: 'Eliminar trayectoria',
+        message: 'Esta acción no se puede deshacer.'
+      });
+      this.removeTrajectory();
+    } catch {
+      // El usuario canceló la acción
+    }
+  }
+
   removeTrajectory() {
     if (!this.currentTrajectory) return;
 
@@ -227,63 +251,63 @@ export class JointsMenuComponent implements OnInit {
   }
 
   planMultipleTrajectory() {
-  if (!this.newTrajectory || this.newTrajectory.points.length === 0) return;
+    if (!this.newTrajectory || this.newTrajectory.points.length === 0) return;
 
-  // 🔹 Cancelar cualquier animación anterior antes de iniciar una nueva
-  this.clearTrajectoryTimeouts();
+    // 🔹 Cancelar cualquier animación anterior antes de iniciar una nueva
+    this.clearTrajectoryTimeouts();
 
-  const first_pose = {
-    angle1: this.robot.angle1() * Math.PI / 180,
-    angle2: this.robot.angle2() * Math.PI / 180,
-    angle3: this.robot.angle3() * Math.PI / 180,
-    angle4: this.robot.angle4() * Math.PI / 180,
-    angle5: this.robot.angle5() * Math.PI / 180,
-    angle6: this.robot.angle6() * Math.PI / 180,
-  }
-
-  const poses = [first_pose];
-  poses.push(
-    ...this.newTrajectory.points.map(pt => ({
-      angle1: pt.angles[0] * Math.PI / 180,
-      angle2: pt.angles[1] * Math.PI / 180,
-      angle3: pt.angles[2] * Math.PI / 180,
-      angle4: pt.angles[3] * Math.PI / 180,
-      angle5: pt.angles[4] * Math.PI / 180,
-      angle6: pt.angles[5] * Math.PI / 180
-    }))
-  );
-
-  this.rosService.planTrajectory(first_pose, poses, false).subscribe({
-    next: (data: any) => {
-      console.log('Planificación de trayectoria múltiple exitosa:', data);
-      if (!data.trajectory || data.trajectory.length === 0) return;
-
-      const allPoints: any[] = [];
-      let totalTime = 0;
-      data.trajectory.forEach((poseEntry: any) => {
-        let prevTime = 0;
-        poseEntry.points.forEach((pt: any) => {
-          const delay = (pt.time_from_start - prevTime) * 1000;
-          totalTime += delay;
-          prevTime = pt.time_from_start;
-          const point = {
-            angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
-            time: pt.time_from_start
-          };
-          // 🔹 Guardamos el timeout para poder cancelarlo después si es necesario
-          const timeoutId = setTimeout(() => {
-            this.moveToPoint(point);
-          }, totalTime);
-          this.trajectoryTimeouts.push(timeoutId);
-          allPoints.push(point);
-        });
-      });
-    },
-    error: (err) => {
-      console.error('Error planificando trayectoria múltiple:', err);
+    const first_pose = {
+      angle1: this.robot.angle1() * Math.PI / 180,
+      angle2: this.robot.angle2() * Math.PI / 180,
+      angle3: this.robot.angle3() * Math.PI / 180,
+      angle4: this.robot.angle4() * Math.PI / 180,
+      angle5: this.robot.angle5() * Math.PI / 180,
+      angle6: this.robot.angle6() * Math.PI / 180,
     }
-  });
-}
+
+    const poses = [first_pose];
+    poses.push(
+      ...this.newTrajectory.points.map(pt => ({
+        angle1: pt.angles[0] * Math.PI / 180,
+        angle2: pt.angles[1] * Math.PI / 180,
+        angle3: pt.angles[2] * Math.PI / 180,
+        angle4: pt.angles[3] * Math.PI / 180,
+        angle5: pt.angles[4] * Math.PI / 180,
+        angle6: pt.angles[5] * Math.PI / 180
+      }))
+    );
+
+    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
+      next: (data: any) => {
+        console.log('Planificación de trayectoria múltiple exitosa:', data);
+        if (!data.trajectory || data.trajectory.length === 0) return;
+
+        const allPoints: any[] = [];
+        let totalTime = 0;
+        data.trajectory.forEach((poseEntry: any) => {
+          let prevTime = 0;
+          poseEntry.points.forEach((pt: any) => {
+            const delay = (pt.time_from_start - prevTime) * 1000;
+            totalTime += delay;
+            prevTime = pt.time_from_start;
+            const point = {
+              angles: pt.positions.map((angle: number) => angle * 180 / Math.PI),
+              time: pt.time_from_start
+            };
+            // 🔹 Guardamos el timeout para poder cancelarlo después si es necesario
+            const timeoutId = setTimeout(() => {
+              this.moveToPoint(point);
+            }, totalTime);
+            this.trajectoryTimeouts.push(timeoutId);
+            allPoints.push(point);
+          });
+        });
+      },
+      error: (err) => {
+        console.error('Error planificando trayectoria múltiple:', err);
+      }
+    });
+  }
 
   // Movimiento cartesiano incremental
   moveCartesian(axis: 'x' | 'y' | 'z', direction: number) {
@@ -483,6 +507,17 @@ export class JointsMenuComponent implements OnInit {
       error: (err) => {
         console.error(`Error ejecutando comando ${cmd}:`, err);
       }
+    });
+  }
+
+  sendCalibrate() {
+    this.rosService.calibrate(
+      this.calibJoint,
+      this.calibBrake,
+      this.calibPosition
+    ).subscribe({
+      next: () => console.log('Calibración enviada'),
+      error: err => this.errorMessage = err.message
     });
   }
 }

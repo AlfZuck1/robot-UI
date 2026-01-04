@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment.development';
 import { First_Pose, Pose, Trajectory, TrajectoryPoint } from '../components/models/trajectory';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable, of, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,11 @@ export class RosService {
   private ros: ROSLIB.Ros;
   private jointStateTopic: ROSLIB.Topic;
   private readonly API_URL = environment.API_URL;
-  private readonly API_PASSWORD = environment.API_PASSWORD;
   private readonly ROSBRIDGE_SERVER_URL = environment.ROSBRIDGE_SERVER_URL;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+    private authService: AuthService
+  ) {
     this.ros = new ROSLIB.Ros({
       url: this.ROSBRIDGE_SERVER_URL
     });
@@ -37,6 +39,14 @@ export class RosService {
       name: '/joint_states',
       messageType: 'sensor_msgs/JointState'
     });
+  }
+
+  private get password(): string {
+    const pwd = this.authService.getPassword();
+    if (!pwd) {
+      throw new Error('Usuario no autenticado. La contraseña es requerida para las operaciones de ROS.');
+    }
+    return pwd;
   }
 
   public getUrdf() {
@@ -69,7 +79,7 @@ export class RosService {
 
   publishJointState(names: string[], positions: number[]) {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       name: names,
       position: positions
     };
@@ -101,7 +111,7 @@ export class RosService {
   // Nueva función para publicar comando en joint6
   publishJoint6Command(value: number) {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       value: value
     };
 
@@ -125,7 +135,7 @@ export class RosService {
 
   public planTrajectory(firstPose: First_Pose, targetPose: any[], cartesian: boolean): Observable<any> {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       first_pose: firstPose,
       poses: targetPose,
       cartesian: cartesian
@@ -139,7 +149,7 @@ export class RosService {
 
   public executeTrajectory() {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
     }
     return this.http.post(`${this.API_URL}/execute_trajectory`, payload).pipe(
       catchError(err => {
@@ -150,7 +160,7 @@ export class RosService {
 
   public executeCommand(cmd: string): Observable<any> {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
     };
     return this.http.post(`${this.API_URL}/send_command/${cmd}`, payload).pipe(
       catchError(err => {
@@ -162,7 +172,7 @@ export class RosService {
 
   public executePosition(targetPose: Pose[]): Observable<any> {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       poses: targetPose
     };
     return this.http.post(`${this.API_URL}/send_positions`, payload).pipe(
@@ -175,7 +185,7 @@ export class RosService {
   // --- CRUD Trajectory
   createTrajectory(trajectory: Trajectory): Observable<any> {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       name: trajectory.name,
       points: trajectory.points
     };
@@ -189,7 +199,7 @@ export class RosService {
 
   updateTrajectory(id: number, trajectory: Trajectory): Observable<any> {
     const payload = {
-      password: this.API_PASSWORD,
+      password: this.password,
       name: trajectory.name,
       points: trajectory.points
     };
@@ -221,11 +231,35 @@ export class RosService {
 
   deleteTrajectory(index: number): Observable<any> {
     return this.http.delete(`${this.API_URL}/trajectories/${index}`,
-      { body: { password: this.API_PASSWORD } }
+      { body: { password: this.password } }
     ).pipe(
       catchError(err => {
         console.error('Error eliminando trayectoria:', err);
         return of(null);
+      })
+    );
+  }
+
+  // --- Calibration API ---
+  calibrate(
+    joint: number,
+    brake_release: number,
+    move_to_position: number
+  ): Observable<any> {
+
+    const payload = {
+      joint: joint,
+      brake_release: brake_release,
+      move_to_position: move_to_position,
+      password: this.password
+    };
+    return this.http.post(
+      `${this.API_URL}/calibrate`,
+      payload
+    ).pipe(
+      catchError(err => {
+        console.error('Error calibrando:', err);
+        return throwError(() => err);
       })
     );
   }

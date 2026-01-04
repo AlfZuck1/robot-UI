@@ -628,3 +628,131 @@
     top: 6px;
   }
 }
+
+.calibration-submenu {
+  background: #2b3b55;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+.calibration-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffcc66;
+  text-align: center;
+}
+
+.calibration-submenu h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #66aaff;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.calibration-submenu hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #66aaff, transparent);
+  margin: 8px 0;
+}
+
+.calibration-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.calib-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #3478f6;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #4a8dff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
+
+  &:active {
+    transform: scale(0.95);
+    background: #285ac1;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, #ffcc66, #ff9f1a);
+    color: #1f1f2e;
+
+    &:hover {
+      background: linear-gradient(135deg, #ffd98a, #ffb347);
+    }
+  }
+
+  &.danger {
+    background: #e74e4e;
+
+    &:hover {
+      background: #ff5f5f;
+      box-shadow: 0 0 10px rgba(231, 78, 78, 0.6);
+    }
+  }
+}
+
+.calibration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #1f1f2e;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.calibration-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #c0c8ff;
+}
+
+.calibration-form select,
+.calibration-form input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2b3b55;
+  color: #fff;
+  font-size: 0.9rem;
+
+  &:focus {
+    outline: none;
+    border-color: #3478f6;
+    box-shadow: 0 0 6px rgba(52, 120, 246, 0.5);
+  }
+}
+
+.calibration-error {
+  font-size: 0.85rem;
+  color: #ffbaba;
+  background: rgba(231, 76, 60, 0.18);
+  border-left: 4px solid #e74c3c;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-top: 4px;
+}

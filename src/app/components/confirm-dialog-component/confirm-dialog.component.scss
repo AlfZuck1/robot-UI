@@ -1,0 +1,99 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  // Evita clicks detrás del modal
+  pointer-events: all;
+}
+
+.dialog {
+  background: #1e1e1e;
+  color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 14px;
+  width: 340px;
+  max-width: calc(100vw - 2rem);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+
+  animation: dialogFadeIn 120ms ease-out;
+}
+
+.dialog h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.dialog p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #d0d0d0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Botones base */
+button {
+  background-color: #4a6aa5;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 80ms ease;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Cancelar */
+.cancel {
+  background: #555;
+
+  &:hover {
+    background: #666;
+  }
+}
+
+/* Confirmar (acción peligrosa) */
+.confirm {
+  background: #c62828;
+
+  &:hover {
+    background: #d32f2f;
+  }
+}
+
+/* Animación */
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
