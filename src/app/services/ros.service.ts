@@ -1,9 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import ROSLIB from 'roslib';
+import { catchError, Observable, of, throwError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-import { First_Pose, Pose, Trajectory, TrajectoryPoint } from '../components/models/trajectory';
-import { HttpClient } from '@angular/common/http';
-import { catchError, first, Observable, of, throwError } from 'rxjs';
+import { First_Pose, Pose, Trajectory } from '../components/models/trajectory';
 import { AuthService } from './auth.service';
 
 @Injectable({

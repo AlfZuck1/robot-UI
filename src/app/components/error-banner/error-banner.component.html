@@ -1,0 +1,10 @@
+<div class="error-wrapper" *ngIf="error$ | async as error">
+    <div class="error-banner">
+        <div class="icon">⚠️</div>
+        <div class="content">
+            <h4>{{ error.title }}</h4>
+            <p>{{ error.message }}</p>
+        </div>
+        <button class="close-btn" (click)="close()">✕</button>
+    </div>
+</div>

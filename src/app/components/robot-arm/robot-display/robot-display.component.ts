@@ -117,9 +117,6 @@ export class RobotDisplayComponent implements AfterViewInit {
     });
   }
 
-  sendMessage() {
-    this.rosService.publishExample();
-  }
 
   ngAfterViewInit(): void {
     this.initScene();
