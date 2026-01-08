@@ -38,50 +38,50 @@
                 <!-- Mantener el bloque existente intacto -->
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 1 ({{ pointAngles[0].toFixed(2) }}°)
+                        Ángulo 1 ({{ pointAngles[0].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-175" max="175" [(ngModel)]="pointAngles[0]"
                             (input)="moveSimulatedJoint('junta_0_1', pointAngles[0])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 2 ({{ pointAngles[1].toFixed(2) }}°)
+                        Ángulo 2 ({{ pointAngles[1].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-90" max="90" [(ngModel)]="pointAngles[1]"
                             (input)="moveSimulatedJoint('junta_1_2', pointAngles[1])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 3 ({{ pointAngles[2].toFixed(2) }}°)
+                        Ángulo 3 ({{ pointAngles[2].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-110" max="110" [(ngModel)]="pointAngles[2]"
                             (input)="moveSimulatedJoint('junta_2_3', pointAngles[2])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 4 ({{ pointAngles[3].toFixed(2) }}°)
+                        Ángulo 4 ({{ pointAngles[3].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[3]"
                             (input)="moveSimulatedJoint('junta_3_4', pointAngles[3])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 5 ({{ pointAngles[4].toFixed(2) }}°)
+                        Ángulo 5 ({{ pointAngles[4].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-105" max="105" [(ngModel)]="pointAngles[4]"
                             (input)="moveSimulatedJoint('junta_4_5', pointAngles[4])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Ángulo 6 ({{ pointAngles[5].toFixed(2) }}°)
+                        Ángulo 6 ({{ pointAngles[5].toFixed(1) }}°)
                         <input class="joint-slider" type="range" min="-180" max="180" [(ngModel)]="pointAngles[5]"
                             (input)="moveSimulatedJoint('junta_5_6', pointAngles[5])" />
                     </label>
                 </div>
                 <div class="joint-control">
                     <label class="joint-label">
-                        Tiempo ({{ robot.time().toFixed(2) }}s)
-                        <input class="joint-slider" type="range" min="0" max="30" [(ngModel)]="robot.time" />
+                        Velocidad ({{ this.velocity() }}%)
+                        <input class="joint-slider" type="range" min="0" max="100" [(ngModel)]="velocity" />
                     </label>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import { Component, effect, HostBinding, OnInit, signal } from '@angular/core';
+import { Component, effect, HostBinding, OnInit, Signal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RosService } from '../../../services/ros.service';
@@ -27,6 +27,7 @@ export class JointsMenuComponent implements OnInit {
   cartesianMode: boolean = false;
   errorMessage: string = '';
   isSmallScreen: boolean = false;
+  velocity: Signal<number> = signal(50);
 
   // Articulaciones
   pointAngles: number[] = [0, 0, 0, 0, 0, 0];
@@ -121,12 +122,6 @@ export class JointsMenuComponent implements OnInit {
     this.robotSimulated.angle4.set(this.pointAngles[3]);
     this.robotSimulated.angle5.set(this.pointAngles[4]);
     this.robotSimulated.angle6.set(this.pointAngles[5]);
-  }
-
-  // TODO: Delete later testing
-  rotate6Joint(angle: number) {
-    const num = angle / 360;
-    this.rosService.publishJoint6Command(num);
   }
 
   // --- Funciones de trayectorias ---
@@ -268,16 +263,16 @@ export class JointsMenuComponent implements OnInit {
     const poses = [first_pose];
     poses.push(
       ...this.newTrajectory.points.map(pt => ({
-        angle1: pt.angles[0] * Math.PI / 180,
-        angle2: pt.angles[1] * Math.PI / 180,
-        angle3: pt.angles[2] * Math.PI / 180,
-        angle4: pt.angles[3] * Math.PI / 180,
-        angle5: pt.angles[4] * Math.PI / 180,
-        angle6: pt.angles[5] * Math.PI / 180
+        angle1: Math.round(pt.angles[0] * 180 / Math.PI * 10) / 10,
+        angle2: Math.round(pt.angles[1] * 180 / Math.PI * 10) / 10,
+        angle3: Math.round(pt.angles[2] * 180 / Math.PI * 10) / 10,
+        angle4: Math.round(pt.angles[3] * 180 / Math.PI * 10) / 10,
+        angle5: Math.round(pt.angles[4] * 180 / Math.PI * 10) / 10,
+        angle6: Math.round(pt.angles[5] * 180 / Math.PI * 10) / 10
       }))
     );
 
-    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false, this.velocity()).subscribe({
       next: (data: any) => {
         console.log('Planificación de trayectoria múltiple exitosa:', data);
         if (!data.trajectory || data.trajectory.length === 0) return;
@@ -332,7 +327,7 @@ export class JointsMenuComponent implements OnInit {
     };
     poses.push({ ...this.currentSimulatedPose });
 
-    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false, this.velocity()).subscribe({
       next: (data: any) => {
         if (!data.trajectory || data.trajectory.length === 0) return;
 
@@ -400,7 +395,7 @@ export class JointsMenuComponent implements OnInit {
 
     poses.push({ ...this.currentSimulatedPose });
 
-    this.rosService.planTrajectory(first_pose, poses, false).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, false, this.velocity()).subscribe({
       next: (data: any) => {
         if (!data.trajectory || data.trajectory.length === 0) return;
 
@@ -456,7 +451,7 @@ export class JointsMenuComponent implements OnInit {
       targetPose
     ]
 
-    this.rosService.planTrajectory(first_pose, poses, this.cartesianMode).subscribe({
+    this.rosService.planTrajectory(first_pose, poses, this.cartesianMode, this.velocity()).subscribe({
       next: (data: any) => {
         console.log('Planificación de trayectoria exitosa:', data);
         if (!data.trajectory || data.trajectory.length === 0) return;

@@ -198,12 +198,12 @@ export class RobotDisplayComponent implements AfterViewInit {
       jointPositionsMap[jointName] = message.position[i];
     });
 
-    this.robot.angle1.set(Math.round(jointPositionsMap['junta_0_1'] * 180 / Math.PI));
-    this.robot.angle2.set(Math.round(jointPositionsMap['junta_1_2'] * 180 / Math.PI));
-    this.robot.angle3.set(Math.round(jointPositionsMap['junta_2_3'] * 180 / Math.PI));
-    this.robot.angle4.set(Math.round(jointPositionsMap['junta_3_4'] * 180 / Math.PI));
-    this.robot.angle5.set(Math.round(jointPositionsMap['junta_4_5'] * 180 / Math.PI));
-    this.robot.angle6.set(Math.round(jointPositionsMap['junta_5_6'] * 180 / Math.PI));
+    this.robot.angle1.set(Math.round(jointPositionsMap['junta_0_1'] * 180 / Math.PI * 10) / 10);
+    this.robot.angle2.set(Math.round(jointPositionsMap['junta_1_2'] * 180 / Math.PI * 10) / 10);
+    this.robot.angle3.set(Math.round(jointPositionsMap['junta_2_3'] * 180 / Math.PI * 10) / 10);
+    this.robot.angle4.set(Math.round(jointPositionsMap['junta_3_4'] * 180 / Math.PI * 10) / 10);
+    this.robot.angle5.set(Math.round(jointPositionsMap['junta_4_5'] * 180 / Math.PI * 10) / 10);
+    this.robot.angle6.set(Math.round(jointPositionsMap['junta_5_6'] * 180 / Math.PI * 10) / 10);
 
   }
 

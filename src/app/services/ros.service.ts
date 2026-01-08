@@ -108,37 +108,14 @@ export class RosService {
     console.log('Estado publicado con éxito', names, positions);*/
   }
 
-  // Nueva función para publicar comando en joint6
-  publishJoint6Command(value: number) {
-    const payload = {
-      password: this.password,
-      value: value
-    };
-
-    fetch(this.API_URL + '/send_joint6_command', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const err = await response.json();
-          console.error('Error publicando joint6:', err.detail || response.statusText);
-          return;
-        }
-        console.log('Joint6 command publicado con éxito:', value);
-      })
-      .catch(err => {
-        console.error('Error al conectar con API:', err);
-      });
-  }
-
-  public planTrajectory(firstPose: First_Pose, targetPose: any[], cartesian: boolean): Observable<any> {
+  public planTrajectory(firstPose: First_Pose, targetPose: any[], cartesian: boolean, velocity: number): Observable<any> {
+    const normalizedVelocity = Math.max(0, Math.min(1, velocity / 100));
     const payload = {
       password: this.password,
       first_pose: firstPose,
       poses: targetPose,
-      cartesian: cartesian
+      cartesian: cartesian,
+      velocity: normalizedVelocity
     };
     return this.http.post(`${this.API_URL}/plan_trajectory`, payload).pipe(
       catchError(err => {
@@ -165,19 +142,6 @@ export class RosService {
     return this.http.post(`${this.API_URL}/send_command/${cmd}`, payload).pipe(
       catchError(err => {
         return throwError(() => new Error('Error ejecutando comando'));
-      })
-    );
-  }
-
-
-  public executePosition(targetPose: Pose[]): Observable<any> {
-    const payload = {
-      password: this.password,
-      poses: targetPose
-    };
-    return this.http.post(`${this.API_URL}/send_positions`, payload).pipe(
-      catchError(err => {
-        return throwError(() => new Error("Error en la planificación o ejecución de la trayectoria"))
       })
     );
   }
