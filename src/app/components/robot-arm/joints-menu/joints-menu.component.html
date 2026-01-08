@@ -35,6 +35,18 @@
         <!-- Submenú Controles -->
         <section *ngIf="activeSubmenu === 'controls'" class="submenu articulations-submenu">
             <div class="joint-controls">
+                <div class="calibration-actions">
+                    <button class="calib-btn" (click)="executeCommand('home')">
+                        🏠 Home
+                    </button>
+                    <button class="calib-btn" (click)="resetRobotPosition()" type="button">
+                        Reset
+                    </button>
+                    <button class="calib-btn run" (click)="executeCommand('run')">
+                        🚀 RUN
+                    </button>
+                </div>
+
                 <!-- Mantener el bloque existente intacto -->
                 <div class="joint-control">
                     <label class="joint-label">
@@ -94,9 +106,6 @@
                 </button>
                 <button class="execute-button" (click)="executePlannedTrajectory()" type="button">
                     Ejecutar Trayectoria
-                </button>
-                <button class="execute-command-button" (click)="resetRobotPosition()" type="button">
-                    Reset
                 </button>
             </div>
         </section>
@@ -171,27 +180,6 @@
         <!-- Submenú Calibración -->
         <section *ngIf="activeSubmenu === 'calibration'" class="submenu calibration-submenu">
             <h2 class="calibration-title">Calibración</h2>
-
-            <!-- Comandos generales -->
-            <div class="calibration-actions">
-                <button class="calib-btn" (click)="executeCommand('reset')">
-                    🔄 Reset
-                </button>
-
-                <button class="calib-btn" (click)="executeCommand('home')">
-                    🏠 Home
-                </button>
-
-                <button class="calib-btn danger" (click)="executeCommand('stop')">
-                    ⛔ STOP
-                </button>
-            </div>
-
-            <hr />
-
-            <!-- Calibración por articulación -->
-            <h3>Calibrar articulación</h3>
-
             <div class="calibration-form">
                 <label>
                     Articulación:

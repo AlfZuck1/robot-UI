@@ -262,12 +262,12 @@ export class JointsMenuComponent implements OnInit {
     const poses = [first_pose];
     poses.push(
       ...this.newTrajectory.points.map(pt => ({
-        angle1: Math.round(pt.angles[0] * Math.PI / 180 * 10) / 10,
-        angle2: Math.round(pt.angles[1] * Math.PI / 180 * 10) / 10,
-        angle3: Math.round(pt.angles[2] * Math.PI / 180 * 10) / 10,
-        angle4: Math.round(pt.angles[3] * Math.PI / 180 * 10) / 10,
-        angle5: Math.round(pt.angles[4] * Math.PI / 180 * 10) / 10,
-        angle6: Math.round(pt.angles[5] * Math.PI / 180 * 10) / 10
+        angle1: pt.angles[0] * Math.PI / 180 ,
+        angle2: pt.angles[1] * Math.PI / 180,
+        angle3: pt.angles[2] * Math.PI / 180,
+        angle4: pt.angles[3] * Math.PI / 180,
+        angle5: pt.angles[4] * Math.PI / 180,
+        angle6: pt.angles[5] * Math.PI / 180
       }))
     );
 
@@ -312,21 +312,21 @@ export class JointsMenuComponent implements OnInit {
     this.clearTrajectoryTimeouts();
 
     const first_pose = {
-      angle1: Math.round(this.robot.angle1() * Math.PI / 180 * 10) / 10,
-      angle2: Math.round(this.robot.angle2() * Math.PI / 180 * 10) / 10,
-      angle3: Math.round(this.robot.angle3() * Math.PI / 180 * 10) / 10,
-      angle4: Math.round(this.robot.angle4() * Math.PI / 180 * 10) / 10,
-      angle5: Math.round(this.robot.angle5() * Math.PI / 180 * 10) / 10,
-      angle6: Math.round(this.robot.angle6() * Math.PI / 180 * 10) / 10,
+      angle1: this.robot.angle1() * Math.PI / 180,
+      angle2: this.robot.angle2() * Math.PI / 180,
+      angle3: this.robot.angle3() * Math.PI / 180,
+      angle4: this.robot.angle4() * Math.PI / 180,
+      angle5: this.robot.angle5() * Math.PI / 180,
+      angle6: this.robot.angle6() * Math.PI / 180,
     }
 
     const targetPose = {
-      angle1: Math.round(this.robotSimulated.angle1() * Math.PI / 180 * 10) / 10,
-      angle2: Math.round(this.robotSimulated.angle2() * Math.PI / 180 * 10) / 10,
-      angle3: Math.round(this.robotSimulated.angle3() * Math.PI / 180 * 10) / 10,
-      angle4: Math.round(this.robotSimulated.angle4() * Math.PI / 180 * 10) / 10,
-      angle5: Math.round(this.robotSimulated.angle5() * Math.PI / 180 * 10) / 10,
-      angle6: Math.round(this.robotSimulated.angle6() * Math.PI / 180 * 10) / 10,
+      angle1: this.robotSimulated.angle1() * Math.PI / 180,
+      angle2: this.robotSimulated.angle2() * Math.PI / 180,
+      angle3: this.robotSimulated.angle3() * Math.PI / 180,
+      angle4: this.robotSimulated.angle4() * Math.PI / 180,
+      angle5: this.robotSimulated.angle5() * Math.PI / 180,
+      angle6: this.robotSimulated.angle6() * Math.PI / 180,
     }
 
     console.log(targetPose);
