@@ -1,22 +1,22 @@
-import { Component, effect, HostBinding, OnInit, Signal, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { RosService } from '../../../services/ros.service';
-import { Trajectory } from '../../models/trajectory';
-import { UiStateService } from '../../../services/ui-state.service';
-import { TrajectoryService } from '../../../services/trajectory.service';
-import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { LoginDialogComponent } from "../../login-dialog/login-dialog.component";
-import { AuthService } from '../../../services/auth.service';
-import { ConfirmDialogComponent } from '../../confirm-dialog-component/confirm-dialog.component';
+import { CommonModule } from '@angular/common';
+import { Component, effect, OnInit, Signal, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 import { ConfirmService } from '../../../services/confirm.service';
+import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
+import { RosService } from '../../../services/ros.service';
+import { TrajectoryService } from '../../../services/trajectory.service';
+import { UiStateService } from '../../../services/ui-state.service';
+import { ConfirmDialogComponent } from '../../confirm-dialog-component/confirm-dialog.component';
+import { LoginMenuComponent } from "../../login-menu/login-menu.component";
+import { Trajectory } from '../../models/trajectory';
 
 
 @Component({
   selector: 'app-joints-menu',
-  imports: [CommonModule, FormsModule, DragDropModule, LoginDialogComponent, ConfirmDialogComponent, RouterOutlet],
+  imports: [CommonModule, FormsModule, DragDropModule, ConfirmDialogComponent, RouterOutlet, LoginMenuComponent],
   templateUrl: './joints-menu.component.html',
   styleUrl: './joints-menu.component.scss'
 })

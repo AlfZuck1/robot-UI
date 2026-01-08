@@ -1,10 +1,10 @@
 <div class="controls-container">
-    <app-login-dialog *ngIf="!authService.isLoggedIn()"></app-login-dialog>
+    <app-login-menu></app-login-menu>
     <button class="menu-toggle" (click)="toggleMenu()" aria-label="Abrir menú" *ngIf="!menuOpen && isSmallScreen">
         ☰ Controles
     </button>
 
-    <div class="controls" [class.open]="menuOpen">
+    <div class="controls" [class.open]="menuOpen" *ngIf="authService.isLoggedIn()">
         <h2>Control del Brazo Robótico</h2>
         <button class="close-menu" (click)="toggleMenu()" aria-label="Cerrar menú" *ngIf="menuOpen">
             ✕

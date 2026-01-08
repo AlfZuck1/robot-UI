@@ -1,0 +1,21 @@
+<div class="login-menu">
+  <button class="login-btn" (click)="toggle()">
+    {{ auth.isLoggedIn() ? '👤 Sesión' : '🔒 Login' }}
+  </button>
+
+  <div class="login-panel" *ngIf="open">
+    <ng-container *ngIf="!auth.isLoggedIn(); else logged">
+      <input
+        type="password"
+        [(ngModel)]="password"
+        placeholder="Contraseña"
+      />
+      <button (click)="login()">Entrar</button>
+    </ng-container>
+
+    <ng-template #logged>
+      <p>Sesión activa</p>
+      <button class="danger" (click)="logout()">Cerrar sesión</button>
+    </ng-template>
+  </div>
+</div>
