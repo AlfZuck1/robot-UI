@@ -304,119 +304,6 @@ export class JointsMenuComponent implements OnInit {
     });
   }
 
-  // Movimiento cartesiano incremental
-  moveCartesian(axis: 'x' | 'y' | 'z', direction: number) {
-    // console.log("Current Pose before move:", this.currentPose);
-    // Asignamos la pose inicial de las articulaciones del robot (actuales)
-    const first_pose = {
-      angle1: this.robotSimulated.angle1() * Math.PI / 180,
-      angle2: this.robotSimulated.angle2() * Math.PI / 180,
-      angle3: this.robotSimulated.angle3() * Math.PI / 180,
-      angle4: this.robotSimulated.angle4() * Math.PI / 180,
-      angle5: this.robotSimulated.angle5() * Math.PI / 180,
-      angle6: this.robotSimulated.angle6() * Math.PI / 180
-    };
-    // Creamos la mini-trayectoria: primero la pose actual que servirá como fallback
-    const poses = [{ ...this.currentSimulatedPose }];
-    // Aumentamos/disminuimos distancia en el eje correspondiente
-    this.currentSimulatedPose = {
-      ...this.currentSimulatedPose,
-      x: axis === 'x' ? this.currentSimulatedPose.x + direction * 0.01 : this.currentSimulatedPose.x,
-      y: axis === 'y' ? this.currentSimulatedPose.y + direction * 0.01 : this.currentSimulatedPose.y,
-      z: axis === 'z' ? this.currentSimulatedPose.z + direction * 0.01 : this.currentSimulatedPose.z,
-    };
-    poses.push({ ...this.currentSimulatedPose });
-
-    this.rosService.planTrajectory(first_pose, poses, false, this.velocity()).subscribe({
-      next: (data: any) => {
-        if (!data.trajectory || data.trajectory.length === 0) return;
-
-        // Tomamos el último punto de la última pose
-        const lastTrajectory = data.trajectory[data.trajectory.length - 1];
-        const lastPoint = lastTrajectory.points[lastTrajectory.points.length - 1];
-        const point = {
-          angles: lastPoint.positions.map((angle: number) => angle * 180 / Math.PI),
-          time: lastPoint.time_from_start
-        };
-        this.moveToPoint(point); // mueve al robot/UI al último punto de la trayectoria
-        // console.log('Movimiento cartesiano incremental exitoso:', point);
-      },
-      error: (err) => {
-        console.log("Reverting to previous pose due to error.", poses[0]);
-        this.currentSimulatedPose = { ...poses[0] }; // revertir a la pose original en caso de error
-        console.error('Error planificando movimiento cartesiano:', err);
-      }
-    });
-  }
-
-  // Movimiento de rotación incremental
-  moveRotation(axis: 'qx' | 'qy' | 'qz', direction: number) {
-    // console.log("Current Pose before rotation:", this.currentPose);
-
-    // Asignamos la pose inicial de las articulaciones del robot (actuales)
-    const poses = [{ ...this.currentSimulatedPose }];
-    const first_pose = {
-      angle1: this.robotSimulated.angle1() * Math.PI / 180,
-      angle2: this.robotSimulated.angle2() * Math.PI / 180,
-      angle3: this.robotSimulated.angle3() * Math.PI / 180,
-      angle4: this.robotSimulated.angle4() * Math.PI / 180,
-      angle5: this.robotSimulated.angle5() * Math.PI / 180,
-      angle6: this.robotSimulated.angle6() * Math.PI / 180
-    };
-
-    // Ángulo incremental a rotar (por ejemplo, 5 grados convertido a radianes)
-    const angleIncrementRad = direction * 5 * Math.PI / 180;
-    // Normalizar el quaternion actual
-    let q = [this.currentSimulatedPose.qx, this.currentSimulatedPose.qy, this.currentSimulatedPose.qz, this.currentSimulatedPose.qw] as [number, number, number, number];
-
-    // Definir el eje de rotación
-    let axisVec: [number, number, number];
-    switch (axis) {
-      case 'qx': axisVec = [1, 0, 0]; break;
-      case 'qy': axisVec = [0, 1, 0]; break;
-      case 'qz': axisVec = [0, 0, 1]; break;
-      default: axisVec = [0, 0, 1];
-    }
-
-    // Crear cuaternión incremental
-    const qIncrement = quatFromAxisAngle(axisVec, angleIncrementRad);
-
-    // Multiplicar: nueva rotación = qIncrement * qActual
-    const qNew = quatMultiply(qIncrement, q);
-
-    // Actualizar la pose
-    this.currentSimulatedPose = {
-      ...this.currentSimulatedPose,
-      qx: qNew[0],
-      qy: qNew[1],
-      qz: qNew[2],
-      qw: qNew[3],
-    };
-
-    poses.push({ ...this.currentSimulatedPose });
-
-    this.rosService.planTrajectory(first_pose, poses, false, this.velocity()).subscribe({
-      next: (data: any) => {
-        if (!data.trajectory || data.trajectory.length === 0) return;
-
-        const lastTrajectory = data.trajectory[data.trajectory.length - 1];
-        const lastPoint = lastTrajectory.points[lastTrajectory.points.length - 1];
-
-        const point = {
-          angles: lastPoint.positions.map((angle: number) => angle * 180 / Math.PI),
-          time: lastPoint.time_from_start
-        };
-
-        this.moveToPoint(point);
-        console.log('Rotación incremental exitosa:', point);
-      },
-      error: (err) => {
-        this.currentSimulatedPose = { ...poses[0] }; // revertir a la pose original en caso de error
-        console.error('Error planificando rotación:', err);
-      }
-    });
-  }
-
   private clearTrajectoryTimeouts() {
     this.trajectoryTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
     this.trajectoryTimeouts = [];
@@ -482,7 +369,6 @@ export class JointsMenuComponent implements OnInit {
     });
   }
 
-
   executePlannedTrajectory() {
     this.rosService.executeTrajectory().subscribe({
       next: (res) => {
@@ -514,6 +400,17 @@ export class JointsMenuComponent implements OnInit {
       next: () => console.log('Calibración enviada'),
       error: err => this.errorMessage = err.message
     });
+  }
+
+  resetRobotPosition() {
+    this.robotSimulated.angle1.set(this.robot.angle1());
+    this.robotSimulated.angle2.set(this.robot.angle2());
+    this.robotSimulated.angle3.set(this.robot.angle3());
+    this.robotSimulated.angle4.set(this.robot.angle4());
+    this.robotSimulated.angle5.set(this.robot.angle5());
+    this.robotSimulated.angle6.set(this.robot.angle6());
+
+    this.pointAngles = [this.robot.angle1(), this.robot.angle2(), this.robot.angle3(), this.robot.angle4(), this.robot.angle5(), this.robot.angle6()];
   }
 }
 

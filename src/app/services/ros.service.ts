@@ -3,7 +3,7 @@ import ROSLIB from 'roslib';
 import { environment } from '../../environments/environment.development';
 import { First_Pose, Pose, Trajectory, TrajectoryPoint } from '../components/models/trajectory';
 import { HttpClient } from '@angular/common/http';
-import { catchError, Observable, of, throwError } from 'rxjs';
+import { catchError, first, Observable, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -142,6 +142,19 @@ export class RosService {
     return this.http.post(`${this.API_URL}/send_command/${cmd}`, payload).pipe(
       catchError(err => {
         return throwError(() => new Error('Error ejecutando comando'));
+      })
+    );
+  }
+
+  public getIk(targetPose: Pose, firstPose: First_Pose): Observable<any> {
+    const payload = {
+      password: this.password,
+      first_pose: firstPose,
+      target_pose: targetPose
+    };
+    return this.http.post(`${this.API_URL}/get_ik`, payload).pipe(
+      catchError(err => {
+        return throwError(() => new Error('Error obteniendo soluciones IK'));
       })
     );
   }

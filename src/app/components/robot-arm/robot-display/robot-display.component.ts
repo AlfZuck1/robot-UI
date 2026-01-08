@@ -1,11 +1,13 @@
-import { AfterViewInit, Component, effect, ElementRef, signal, ViewChild } from '@angular/core';
-import { RosService } from '../../../services/ros.service';
+import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, effect, ElementRef, ViewChild } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import URDFLoader from 'urdf-loader';
-import { UiStateService } from '../../../services/ui-state.service';
 import { RobotStateService, RobotStateServiceSimulated } from '../../../services/robot-state.service';
-import { CommonModule } from '@angular/common';
+import { RosService } from '../../../services/ros.service';
+import { UiStateService } from '../../../services/ui-state.service';
+import { First_Pose, Pose } from '../../models/trajectory';
 
 @Component({
   selector: 'app-robot-display',
@@ -35,6 +37,12 @@ export class RobotDisplayComponent implements AfterViewInit {
   endEffectorAxisHelperSimulated!: THREE.AxesHelper;
   manualMode: boolean = false;
   controls!: OrbitControls;
+
+  rotateControls!: TransformControls;
+  translateControls!: TransformControls;
+  draggingTarget = false;
+  private ikThrottleTimer: any = null;
+  private ikThrottleDelay = 200;
 
   constructor(private rosService: RosService,
     private uiStateService: UiStateService,
@@ -150,11 +158,6 @@ export class RobotDisplayComponent implements AfterViewInit {
     }
     this.camera.lookAt(0, 1.0, 0);
 
-    // Controles de órbita
-    const controls = new OrbitControls(this.camera, this.renderer.domElement);
-    controls.target.set(0, 1.0, 0);
-    controls.update();
-
     // Luz ambiental
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
@@ -207,6 +210,15 @@ export class RobotDisplayComponent implements AfterViewInit {
 
   }
 
+  updateRobotSimulatedMovement(angles: number[]) {
+    this.robotSimulated.angle1.set(angles[0]);
+    this.robotSimulated.angle2.set(angles[1]);
+    this.robotSimulated.angle3.set(angles[2]);
+    this.robotSimulated.angle4.set(angles[3]);
+    this.robotSimulated.angle5.set(angles[4]);
+    this.robotSimulated.angle6.set(angles[5]);
+  }
+
   animate() {
     requestAnimationFrame(() => this.animate());
 
@@ -221,15 +233,13 @@ export class RobotDisplayComponent implements AfterViewInit {
         this.endEffectorAxisHelper.quaternion.copy(quat);
       }
     }
-    if (this.robotModelSimulated && this.endEffectorAxisHelperSimulated) {
+    if (!this.draggingTarget && this.robotModelSimulated && this.endEffectorAxisHelperSimulated) {
       const endEffectorSim = this.robotModelSimulated.links["ee_link"];
       if (endEffectorSim) {
-        const posSim = new THREE.Vector3();
-        const quatSim = new THREE.Quaternion();
-        endEffectorSim.getWorldPosition(posSim);
-        endEffectorSim.getWorldQuaternion(quatSim);
-        this.endEffectorAxisHelperSimulated.position.copy(posSim);
-        this.endEffectorAxisHelperSimulated.quaternion.copy(quatSim);
+        endEffectorSim.getWorldPosition(this.endEffectorAxisHelperSimulated.position);
+        endEffectorSim.getWorldQuaternion(this.endEffectorAxisHelperSimulated.quaternion);
+        this.translateControls.attach(this.endEffectorAxisHelperSimulated);
+        this.rotateControls.attach(this.endEffectorAxisHelperSimulated);
       }
     }
     this.renderer.render(this.scene, this.camera);
@@ -294,6 +304,106 @@ export class RobotDisplayComponent implements AfterViewInit {
       } catch (e) {
         console.error('Error al cargar el modelo URDF:', e);
       }
+    });
+
+    this.rotateControls = new TransformControls(this.camera, this.renderer.domElement);
+    this.rotateControls.setMode('rotate');
+    this.rotateControls.setSpace('world');
+    this.rotateControls.setSize(0.2);
+    this.scene.add(this.rotateControls.getHelper());
+    this.rotateControls.enabled = true;
+    this.rotateControls.attach(this.endEffectorAxisHelperSimulated);
+    this.rotateControls.addEventListener('dragging-changed', (event) => {
+      this.controls.enabled = !event.value;
+      this.draggingTarget = event.value as boolean;
+    });
+
+    this.rotateControls.addEventListener('objectChange', () => {
+      if (!this.draggingTarget) return;
+      if (this.ikThrottleTimer) return;
+
+      this.ikThrottleTimer = setTimeout(() => {
+        const pos = this.endEffectorAxisHelperSimulated.position.clone();
+        const quat = this.endEffectorAxisHelperSimulated.quaternion.clone();
+        this.onTargetPoseChanged(pos, quat);
+        this.ikThrottleTimer = null;
+      }, this.ikThrottleDelay);
+    });
+
+
+    this.translateControls = new TransformControls(this.camera, this.renderer.domElement);
+    this.translateControls.setMode('translate');
+    this.translateControls.setSpace('world');
+    this.translateControls.setSize(0.2);
+    this.scene.add(this.translateControls.getHelper());
+    this.translateControls.enabled = true;
+    this.translateControls.attach(this.endEffectorAxisHelperSimulated);
+    this.translateControls.addEventListener('dragging-changed', (event) => {
+      this.controls.enabled = !event.value;
+      this.draggingTarget = event.value as boolean;
+    });
+
+    this.translateControls.addEventListener('objectChange', () => {
+      if (!this.draggingTarget) return;
+      if (this.ikThrottleTimer) return;
+
+      this.ikThrottleTimer = setTimeout(() => {
+        const pos = this.endEffectorAxisHelperSimulated.position.clone();
+        const quat = this.endEffectorAxisHelperSimulated.quaternion.clone();
+
+        this.onTargetPoseChanged(pos, quat);
+        this.ikThrottleTimer = null;
+      }, this.ikThrottleDelay);
+    });
+  }
+
+  onTargetPoseChanged(position: THREE.Vector3, quaternion: THREE.Quaternion) {
+
+    const rosPosition = new THREE.Vector3(
+      position.x / 3,
+      -position.z / 3,
+      position.y / 3
+    );
+
+    const modelInclination = new THREE.Quaternion()
+      .setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0));
+
+    const rosQuaternion = quaternion.clone();
+    rosQuaternion.premultiply(modelInclination);
+
+    const firstPose: First_Pose = {
+      angle1: this.robotSimulated.angle1() * Math.PI / 180,
+      angle2: this.robotSimulated.angle2() * Math.PI / 180,
+      angle3: this.robotSimulated.angle3() * Math.PI / 180,
+      angle4: this.robotSimulated.angle4() * Math.PI / 180,
+      angle5: this.robotSimulated.angle5() * Math.PI / 180,
+      angle6: this.robotSimulated.angle6() * Math.PI / 180,
+    };
+
+    const pose: Pose = {
+      x: rosPosition.x,
+      y: rosPosition.y,
+      z: rosPosition.z,
+      qx: rosQuaternion.x,
+      qy: rosQuaternion.y,
+      qz: rosQuaternion.z,
+      qw: rosQuaternion.w
+    };
+
+    console.log('📤 Pose enviada a IK:', pose);
+
+    this.rosService.getIk(pose, firstPose).subscribe({
+      next: (data) => {
+        this.updateRobotSimulatedMovement([
+          data.joint_positions[0] * 180 / Math.PI,
+          data.joint_positions[1] * 180 / Math.PI,
+          data.joint_positions[2] * 180 / Math.PI,
+          data.joint_positions[3] * 180 / Math.PI,
+          data.joint_positions[4] * 180 / Math.PI,
+          data.joint_positions[5] * 180 / Math.PI,
+        ]);
+      },
+      error: err => console.error('IK error', err)
     });
   }
 
@@ -478,7 +588,7 @@ export class RobotDisplayComponent implements AfterViewInit {
     robot.qw.set(rosQuaternion.w);
   }
 
-  stopMotion(){
+  stopMotion() {
     this.rosService.executeCommand('stop').subscribe(
       {
         next: (data) => {
